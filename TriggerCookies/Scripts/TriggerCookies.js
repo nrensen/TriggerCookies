@@ -451,10 +451,8 @@ TRIGGER COOKIES MODS
 
 /* Saves the game and TriggerCookie settings. */
 TriggerCookies.WriteSave = function (exporting) {
-	Overrides.Backup.Functions['Game.WriteSave'].func(exporting);
-
-	if (!exporting)
-		TriggerCookies.SaveSettings();
+	TriggerCookies.SaveSettings();
+	return Overrides.Backup.Functions['Game.WriteSave'].func(exporting);
 }
 
 /* Saves TriggerCookie settings. */
