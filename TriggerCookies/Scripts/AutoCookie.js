@@ -1371,7 +1371,7 @@ AutoCookie.Actions = {
 	autobuy: new AutoCookieAction('Autobuy', null, [15, 0], 'toggle', false, 50, AutoCookie.Autobuy, false),
 	autobuildings: new AutoCookieAction('Autobuy Buildings', null, [15, 0], 'toggle', false, 0, function () {}, true),
 	autoupgrades: new AutoCookieAction('Autobuy Upgrades', null, [9, 0], 'toggle', false, 0, function () {}, true),
-	autoresearch: new AutoCookieAction('Autobuy Reasearch', null, [11, 9], 'toggle', false, 0, function () {}, true),
+	autoresearch: new AutoCookieAction('Autobuy Research', null, [11, 9], 'toggle', false, 0, function () {}, true),
 	autoseason: new AutoCookieAction('Season Cycle', null, [16, 6], 'toggle', false, 0, function () { }, true),
 
 	maintainseason: new AutoCookieAction('Maintain Season', null, [16, 6], 'toggle', false, 0, function () { }, true),
