@@ -306,22 +306,21 @@ CalcCookie.RebuildUpgrades = function () {
 	for (var i in Game.UpgradesInStore) {
 		//if (!Game.UpgradesInStore[i]) break;
 		var me = Game.UpgradesInStore[i];
-		var str = '';
+		var str = '<div class="crate upgrade';
+		if (me.getPrice() < Game.cookies)
+		    str += ' enabled';
+		str += '" ';
 		if (me.pool == 'toggle' || !CalcCookie.Actions['upgradebci'].Enabled) {
-			str = '<div class="crate upgrade" ' +
-			Game.getTooltip('<div style="min-width:200px;"><div style="float:right;"><span class="price">' + Beautify(Math.round(me.getPrice())) + '</span></div><small>' + (me.pool == 'toggle' ? '[Togglable]' : '[Upgrade]') + '</small><div class="name">' + me.name + '</div><div class="description">' + me.desc + '</div></div>', 'store') + ' ' +
-			Game.clickStr + '="Game.UpgradesById[' + me.id + '].buy();" id="upgrade' + i + '" style="' + (me.icon[2] ? 'background-image:url(' + me.icon[2] + ');' : '') + 'background-position:' + (-me.icon[0] * 48) + 'px ' + (-me.icon[1] * 48) + 'px;">' +
-			'</div>';
-			if (me.pool == 'toggle') toggleStr += str; else storeStr += str;
+			str += Game.getTooltip('<div style="min-width:200px;"><div style="float:right;"><span class="price">' + Beautify(Math.round(me.getPrice())) + '</span></div><small>' + (me.pool == 'toggle' ? '[Togglable]' : '[Upgrade]') + '</small><div class="name">' + me.name + '</div><div class="description">' + me.desc + '</div></div>', 'store') + ' ' +
+			Game.clickStr + '="Game.UpgradesById[' + me.id + '].buy();" id="upgrade' + i + '" style="' + (me.icon[2] ? 'background-image:url(' + me.icon[2] + ');' : '') + 'background-position:' + (-me.icon[0] * 48) + 'px ' + (-me.icon[1] * 48) + 'px;">';
 		}
 		else {
-			str = '<div class="crate upgrade" ' + Game.getDynamicTooltip('CalcCookie.UpgradeTooltipBCI.bind(Game.UpgradesById[' + me.id + '])', 'store') + ' ' +
+			str += Game.getDynamicTooltip('CalcCookie.UpgradeTooltipBCI.bind(Game.UpgradesById[' + me.id + '])', 'store') + ' ' +
 			Game.clickStr + '="Game.UpgradesById[' + me.id + '].buy();" id="upgrade' + i + '" style="' + (me.icon[2] ? 'background-image:url(' + me.icon[2] + ');' : '') + 'background-position:' + (-me.icon[0] * 48) + 'px ' + (-me.icon[1] * 48) + 'px;">' +
-			'<div id="upgradeBCI' + i + '" style="width: 0; height: 0; border-style: solid; border-width: 10px 10px 0 0; border-color: ' + me.bciColor + ' transparent transparent"></div>' +
-			'</div>';
-			storeStr += str;
+			'<div id="upgradeBCI' + i + '" style="width: 0; height: 0; border-style: solid; border-width: 10px 10px 0 0; border-color: ' + me.bciColor + ' transparent transparent"></div>';
 		}
-		//if (me.pool == 'toggle') toggleStr += str; else storeStr += str;
+		str += '</div>';
+		if (me.pool == 'toggle') toggleStr += str; else storeStr += str;
 	}
 	l('upgrades').innerHTML = storeStr;
 	l('toggleUpgrades').innerHTML = toggleStr;
@@ -339,7 +338,7 @@ CalcCookie.BuildingBCIOff = function () {
 			textID.style.color = '#F66';
 	}
 }
-CalcCookie.UpgradeBCIOff = function () {
+CalcCookie.RefreshUpgrades = function() {
 
 	CalcCookie.RebuildUpgrades();
 }
@@ -1077,7 +1076,7 @@ CALC COOKIE ACTIONS
 /* The list of actions. */
 CalcCookie.Actions = {
 	buildingbci: new CalcCookieAction('Building BCI', 'toggle', 300, CalcCookie.UpdateBuildingBCI, CalcCookie.UpdateBuildingBCI, CalcCookie.BuildingBCIOff),
-	upgradebci: new CalcCookieAction('Upgrade BCI', 'toggle', 2000, CalcCookie.UpdateUpgradeBCI, CalcCookie.UpgradeBCIOff, CalcCookie.UpgradeBCIOff),
+	upgradebci: new CalcCookieAction('Upgrade BCI', 'toggle', 2000, CalcCookie.UpdateUpgradeBCI, CalcCookie.RefreshUpgrades, CalcCookie.RefreshUpgrades),
 
 	clickrate: new CalcCookieAction('Update Click Rate', 'toggle', 500, CalcCookie.UpdateClickRate)
 
