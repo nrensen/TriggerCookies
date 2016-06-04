@@ -386,6 +386,8 @@ StatGolden.prototype.Update = function () {
 		'blood frenzy': 'Elder Frenzy',
 		'click frenzy': 'Click Frenzy',
 		'chain cookie': 'Cookie Chain',
+		'dragon harvest': 'Dragon Harvest',
+		'dragonflight': 'Dragon Flight',
 		'blab': 'Blab <small>(you lucky bastard)</small>'
 	};
 	this.LastEffectName = (Game.goldenCookie.last.length != 0 ? effectnames[Game.goldenCookie.last] : 'N/A');
@@ -397,7 +399,7 @@ StatGolden.prototype.Update = function () {
 	else {
 		this.LastBlab = new Date().getTime() - this.LastBlabTime;
 	}
-	if (game.frenzy > 0 && Game.clickFrenzy > 0) {
+	if (Game.frenzy > 0 && Game.clickFrenzy > 0) {
 		this.LastFrenzyComboTime = new Date().getTime();
 		this.LastFrenzyCombo = 0;
 	}
@@ -406,10 +408,10 @@ StatGolden.prototype.Update = function () {
 	}
 
 	// Lucky
-	this.LuckyRequired = Game.cookiesPs * 6000;
-	this.LuckyReward = Math.min(Game.cookies * 0.15, Game.cookiesPs * 900) + 13;//add 15% to cookies owned (+13), or 15 minutes of cookie production - whichever is lowest
-	this.LuckyFrenzyRequired = Game.cookiesPs * 42000;
-	this.LuckyFrenzyReward = Math.min(Game.cookies * 0.15, Game.cookiesPs * 6300) + 13;//add 15% to cookies owned (+13), or 105 minutes of cookie production - whichever is lowest
+	this.LuckyRequired = StatCookie.CookieStats.BaseCPS * 6000;
+	this.LuckyReward = Math.min(Game.cookies * 0.15, StatCookie.CookieStats.BaseCPS * 900) + 13;//add 15% to cookies owned (+13), or 15 minutes of cookie production - whichever is lowest
+	this.LuckyFrenzyRequired = StatCookie.CookieStats.BaseCPS * 42000;
+	this.LuckyFrenzyReward = Math.min(Game.cookies * 0.15, StatCookie.CookieStats.BaseCPS * 6300) + 13;//add 15% to cookies owned (+13), or 105 minutes of cookie production - whichever is lowest
 
 	
 	// Cookie Chain
