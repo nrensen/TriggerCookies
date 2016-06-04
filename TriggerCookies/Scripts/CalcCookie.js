@@ -38,6 +38,21 @@ function iCalc(name) {
 		return 'CalcCookie' + name;
 	return name;
 }
+/* Available cookies, allowing for protected amount. */
+function AvailableCookies() {
+	var mult = 0;
+	if (!CalcCookie.MaintainLucky || CalcCookie.BestOverallItem.Time < 1800)
+		mult = 0;
+	else if (Game.Upgrades['Get lucky'].bought)
+		mult = 42000;
+	else if (Game.Upgrades['Serendipity'].bought)
+		mult = 6000;
+	else if (Game.Upgrades['Lucky day'].bought)
+		mult = 1000;
+	if (Game.frenzy > 0)
+		mult = mult / Game.frenzyPower;
+	return Game.cookies - Game.cookiesPs * mult;
+}
 
 //#endregion
 /*=====================================================================================
@@ -389,7 +404,7 @@ BuyoutItem.prototype.Buy = function () {
 		Game.Upgrades[this.Name].buy(true);
 }
 BuyoutItem.prototype.CanAfford = function () {
-	return this.Price <= Game.cookies;
+	return this.Price <= AvailableCookies();
 }
 
 //#endregion
@@ -527,7 +542,7 @@ SeasonCalculator.prototype.UpgradeSanta = function () {
 
 		// This is the in game code for upgrading santa.
 		var moni = Math.pow(Game.santaLevel + 1, Game.santaLevel + 1);
-		if (Game.cookies > moni && Game.santaLevel < 14) {
+		if (AvailableCookies() > moni && Game.santaLevel < 14) {
 			Game.Spend(moni);
 			Game.santaLevel = (Game.santaLevel + 1) % 15;
 			if (Game.santaLevel == 14) {
@@ -735,8 +750,8 @@ PriceCalculator.prototype.CalculateBuildingBCI = function (building) {
 		income: Math.round(newCPS - oldCPS),
 		cps: newCPS,
 		price: price,
-		afford: (price <= Game.cookies),
-		time: ((price <= Game.cookies) ? 0 : (price - Game.cookies) / oldCPS)
+		afford: (price <= AvailableCookies()),
+		time: ((price <= AvailableCookies()) ? 0 : (price - AvailableCookies()) / oldCPS)
 	};
 }
 PriceCalculator.prototype.CalculateUpgradeBCI = function (upgrade) {
@@ -759,8 +774,8 @@ PriceCalculator.prototype.CalculateUpgradeBCI = function (upgrade) {
 		income: newCPS - oldCPS,
 		cps: newCPS,
 		price: price,
-		afford: (price <= Game.cookies),
-		time: ((price <= Game.cookies) ? 0 : (price - Game.cookies) / oldCPS)
+		afford: (price <= AvailableCookies()),
+		time: ((price <= AvailableCookies()) ? 0 : (price - AvailableCookies()) / oldCPS)
 	};
 }
 PriceCalculator.prototype.FindBuildingBCIs = function (force) {
@@ -809,7 +824,7 @@ PriceCalculator.prototype.FindBuildingBCIs = function (force) {
 				// If this building can be afforded
 				if (info.afford) {
 					// Get the new time till the building can be bought if this building is purchased.
-					var newTime = (bestItem.Price - (Game.cookies - info.price)) / info.cps;
+					var newTime = (bestItem.Price - (AvailableCookies() - info.price)) / info.cps;
 					if (newTime < bestItem.Time && (timeBonus == -1 || newTime < timeBonus)) {
 						timeItem	= new BuyoutItem(building.name, 'building', 1, info.price, bestItem.BCI, info.income, info.time);
 						timeBonus	= newTime;
@@ -849,7 +864,7 @@ PriceCalculator.prototype.FindUpgradeBCIs = function (force, allowbuildings) {
 			//upgradeBCIs.push(info.bci);
 			upgradeBCIs.push({ bci: info.bci, income: info.income, time: info.time, valued: true });
 			//if (info.afford && !bestValued && upgrade.name != 'Chocolate egg') {
-			if (Game.cookies * CalcCookie.ValuedUpgrades[upgrade.name] >= info.price && !bestValued && upgrade.name != 'Chocolate egg') {
+			if (AvailableCookies() * CalcCookie.ValuedUpgrades[upgrade.name] >= info.price && !bestValued && upgrade.name != 'Chocolate egg') {
 				info.valued = true;
 				bestItem = info;
 				bestName = upgrade.name;
@@ -894,7 +909,7 @@ PriceCalculator.prototype.FindUpgradeBCIs = function (force, allowbuildings) {
 						continue;
 
 					// If this building can be afforded
-					var newTime = info.time + (bestItem.Price - (info.time > 0 ? 0 : (Game.cookies - info.price))) / info.cps;
+					var newTime = info.time + (bestItem.Price - (info.time > 0 ? 0 : (AvailableCookies() - info.price))) / info.cps;
 					if (newTime < bestItem.Time && (timeBonus == -1 || newTime < timeBonus)) {
 						timeItem = new BuyoutItem(building.name, 'building', 1, info.price, bestItem.BCI, info.income, info.time);
 						timeBonus = newTime;
@@ -908,7 +923,7 @@ PriceCalculator.prototype.FindUpgradeBCIs = function (force, allowbuildings) {
 				var info = bestNonResearchItem;
 
 				// If this building can be afforded
-				var newTime = info.time + (bestItem.Price - (info.time > 0 ? 0 : (Game.cookies - info.price))) / info.cps;
+				var newTime = info.time + (bestItem.Price - (info.time > 0 ? 0 : (AvailableCookies() - info.price))) / info.cps;
 				//console.log(timeBonus + ', ' + newTime + ', ' + timeItem.Time);
 				if (newTime < bestItem.Time && (timeBonus == -1 || newTime < timeBonus)) {
 					timeItem = new BuyoutItem(upgrade.name, 'upgrade', bestItem.Priority, info.price, bestItem.BCI, info.income, info.time);
@@ -1068,6 +1083,8 @@ CalcCookie.BestOverallItem = new BuyoutItem();
 CalcCookie.BestOverallGoal = new BuyoutItem();
 CalcCookie.BestSeasonItem = new BuyoutItem();
 CalcCookie.BestResearchItem = new BuyoutItem();
+
+CalcCookie.MaintainLucky = false;
 
 /*=====================================================================================
 CALC COOKIE ACTIONS

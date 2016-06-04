@@ -174,6 +174,7 @@ AutoCookie.Load = function (data) {
 			readAction('maintainseason', name, value);
 			readAction('maintainpledge', name, value);
 			readAction('maintainelder', name, value);
+			readAction('maintainlucky', name, value);
 
 			if (isValid('autoclickspeed', name, value)) {
 				AutoCookie.AutoClickRate = value;
@@ -230,6 +231,7 @@ AutoCookie.Save = function () {
 	writeAction('maintainseason') +
 	writeAction('maintainpledge') +
 	writeAction('maintainelder') +
+	writeAction('maintainlucky') +
 
 	write('autoclickspeed', AutoCookie.AutoClickRate) +
 
@@ -307,6 +309,7 @@ AutoCookie.WriteMenu = function (tab) {
 		'<div class="listing">' +
 		AutoCookie.WriteButton('maintainelder') +
 		AutoCookie.WriteButton('maintainpledge') +
+		AutoCookie.WriteButton('maintainlucky') +
 		AutoCookie.WriteButton('maintainseason') +
 		Helper.Menu.WriteSpacing() +
 		'<select id="' + iAuto('seasonInput') + '" onchange="AutoCookie.CheckSeasonInput();" style="font-size: 14px; background-color: #111; color: #FFF; border: 1px ridge #444; padding: 2px;">' +
@@ -671,6 +674,7 @@ AutoCookie.EnabledAll = function () {
 	AutoCookie.Actions['maintainseason'].Enable(false);
 	AutoCookie.Actions['maintainpledge'].Enable(false);
 	AutoCookie.Actions['maintainelder'].Enable(false);
+	AutoCookie.Actions['maintainlucky'].Enable(false);
 
 	AutoCookie.UpdateButtons();
 	Game.UpdateMenu();
@@ -692,6 +696,7 @@ AutoCookie.DisableAll = function () {
 	AutoCookie.Actions['maintainseason'].Disable(false);
 	AutoCookie.Actions['maintainpledge'].Disable(false);
 	AutoCookie.Actions['maintainelder'].Disable(false);
+	AutoCookie.Actions['maintainlucky'].Disable(false);
 
 	AutoCookie.Actions['autoascend'].Disable(false);
 	AutoCookie.Actions['allowdevil'].Disable(false);
@@ -1204,6 +1209,10 @@ AutoCookie.ToggleAllowDevil = function () {
 	AutoCookie.PurchaseDevil = AutoCookie.Actions['allowdevil'].Enabled;
 }
 
+AutoCookie.ToggleMaintainLucky = function () {
+	CalcCookie.MaintainLucky = AutoCookie.Actions['maintainlucky'].Enabled;
+}
+
 //#endregion
 /*=====================================================================================
 AUTO-COOKIE BUYOUT ITEM
@@ -1377,6 +1386,7 @@ AutoCookie.Actions = {
 	maintainseason: new AutoCookieAction('Maintain Season', null, [16, 6], 'toggle', false, 0, function () { }, true),
 	maintainpledge: new AutoCookieAction('Maintain Pledge', null, [9, 9], 'toggle', false, 0, function () { }, true),
 	maintainelder: new AutoCookieAction('Apply Elder Covenant', null, [8, 9], 'toggle', false, 0, function () { }, true),
+	maintainlucky: new AutoCookieAction('Maintain Lucky Balance', null, [11, 14], 'toggle', false, 0, AutoCookie.ToggleMaintainLucky, true),
 
 	autoascend: new AutoCookieAction('Auto Ascend', null, [19, 7], 'toggle', false, 5000, AutoCookie.AutoAscend, true),
 	allowdevil: new AutoCookieAction('Allow "devil" Upgrade', null, [7, 11], 'toggle', false, 0, AutoCookie.ToggleAllowDevil, true),

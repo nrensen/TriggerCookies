@@ -406,10 +406,10 @@ StatGolden.prototype.Update = function () {
 	}
 
 	// Lucky
-	this.LuckyRequired = Game.cookiesPs * 60 * 20 * 10;
-	this.LuckyReward = Math.min(Game.cookies * 0.1, Game.cookiesPs * 60 * 20) + 13;//add 10% to cookies owned (+13), or 20 minutes of cookie production - whichever is lowest
-	this.LuckyFrenzyRequired = Game.cookiesPs * 60 * 20 * 7 * 10;
-	this.LuckyFrenzyReward = Math.min(Game.cookies * 0.1, Game.cookiesPs * 60 * 20 * 7) + 13;//add 10% to cookies owned (+13), or 20 minutes of cookie production - whichever is lowest
+	this.LuckyRequired = Game.cookiesPs * 6000;
+	this.LuckyReward = Math.min(Game.cookies * 0.15, Game.cookiesPs * 900) + 13;//add 15% to cookies owned (+13), or 15 minutes of cookie production - whichever is lowest
+	this.LuckyFrenzyRequired = Game.cookiesPs * 42000;
+	this.LuckyFrenzyReward = Math.min(Game.cookies * 0.15, Game.cookiesPs * 6300) + 13;//add 15% to cookies owned (+13), or 105 minutes of cookie production - whichever is lowest
 
 	
 	// Cookie Chain
