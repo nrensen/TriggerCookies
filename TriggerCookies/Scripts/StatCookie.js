@@ -656,7 +656,7 @@ StatSeasons.prototype.WriteStats = function () {
 	};
 
 	str +=
-	'<div class="listing"><b>Current season : </b> <div id="' + iStat('currentSeason') + '" class="priceoff">' + seasonNames[Game.season] + (Game.seasonT > 0 && Game.season != '' ? ' (time remaining: ' + Helper.Numbers.GetTime(Game.seasonT, 3) + ')' : '') + '</div></div>' +
+	'<div class="listing"><b>Current season : </b> <div id="' + iStat('currentSeason') + '" class="priceoff">' + seasonNames[Game.season] + (Game.seasonT > 0 && Game.season != '' ? ' (time remaining: ' + Helper.Numbers.GetTime(Game.seasonT / Game.fps * 1000, 3) + ')' : '') + '</div></div>' +
 
 	'<div class="listing"><b>Reindeer found : </b> <div id="' + iStat('reindeerFound') + '" class="priceoff">' + Beautify(Game.reindeerClicked) + '</div></div>' +
 
@@ -695,7 +695,7 @@ StatSeasons.prototype.UpdateStats = function () {
 		fools: 'Business Day'
 	};
 
-	lStat('currentSeason').innerHTML = seasonNames[Game.season] + (Game.seasonT > 0 && Game.season != '' ? ' (time remaining: ' + Helper.Numbers.GetTime(Game.seasonT, 3) + ')' : '');
+	lStat('currentSeason').innerHTML = seasonNames[Game.season] + (Game.seasonT > 0 && Game.season != '' ? ' (time remaining: ' + Helper.Numbers.GetTime(Game.seasonT / Game.fps * 1000, 3) + ')' : '');
 	lStat('reindeerFound').innerHTML = Beautify(Game.reindeerClicked);
 
 	lStat('santaLevel').innerHTML = Beautify(this.SantaLevel) + '/' + Beautify(15) + (this.SantaLevel > 0 ? ' ' + this.Lists.SantaLevels[this.SantaLevel - 1] : '');
