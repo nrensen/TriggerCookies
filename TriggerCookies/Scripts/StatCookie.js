@@ -102,6 +102,7 @@ AUTO-COOKIE INITIALIZATION
 /* Initializes Stat-Cookie. */
 StatCookie.Init = function () {
 	LoadTriggerCookies();
+	LoadMod('CalcCookie');
 
 	IntervalUntilAllLoaded(['CalcCookie'], function () {
 		TriggerCookies.AddMod('Stat Cookie', 'StatCookie', [9, 6], StatCookie.Enable, StatCookie.Disable, null, null, StatCookie.WriteMenu, StatCookie.UpdateMenu, true);
