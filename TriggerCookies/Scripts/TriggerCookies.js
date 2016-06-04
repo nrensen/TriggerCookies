@@ -91,7 +91,7 @@ TriggerCookies.Init = function () {
 	// Wait until Overrides.js is loaded
 	IntervalUntilAllLoaded(['Overrides', 'Helper'], function () {
 		Overrides.OverrideFunction('Game.ShowMenu', 'TriggerCookies.ShowMenu', 'TriggerCookies');
-		Overrides.OverrideFunction('Overrides.UpdateMenuLog', 'TriggerCookies.UpdateMenuLog', 'TriggerCookies');
+		Overrides.OverrideFunction('Game.UpdateMenu', 'TriggerCookies.UpdateMenu', 'TriggerCookies');
 		Overrides.OverrideFunction('Game.WriteSave', 'TriggerCookies.WriteSave', 'TriggerCookies');
 		Overrides.AppendFunction('Game.Logic', 'TriggerCookies.Logic', null, 'TriggerCookies');
 		
@@ -369,22 +369,21 @@ TriggerCookies.WriteMenus = function () {
 }
 
 /* Adds information to the Game menu menu. */
-TriggerCookies.UpdateMenuLog = function () {
-
-	if (TriggerCookies.ForceWriteMenu) {
+TriggerCookies.UpdateMenu = function () {
+	if (TriggerCookies.ForceWriteMenu)
 		TriggerCookies.WriteMenus();
-	}
+
+	if (Game.onMenu != 'log')
+		Overrides.Backup.Functions['Game.UpdateMenu'].func();
 	else {
+		l('menu').innerHTML = '<div style="position:absolute;top:8px;right:8px;cursor:pointer;font-size:16px;" ' + Game.clickStr + '="Game.ShowMenu();">X</div>';
+
 		for (var i in TriggerCookies.Mods) {
 			var mod = TriggerCookies.Mods[i];
-			if (mod.Enabled) {
+			if (mod.Enabled)
 				mod.UpdateMenu();
-			}
 		}
 	}
-
-	return '';
-
 }
 TriggerCookies.ShowMenu = function (what) {
 	if (!what || what == '') {
