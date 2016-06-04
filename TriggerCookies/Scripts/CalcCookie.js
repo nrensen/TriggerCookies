@@ -400,8 +400,10 @@ function BuyoutItem(name, type, priority, price, bci, income, time) {
 BuyoutItem.prototype.Buy = function () {
 	if (this.Type == 'building')
 		Game.Objects[this.Name].buy();
-	else if (this.Type == 'upgrade')
-		Game.Upgrades[this.Name].buy(true);
+	else if (this.Type == 'upgrade') {
+		var success = Game.Upgrades[this.Name].buy(true);
+		console.log('Success: ' + success + ', Bought: ' + Game.Upgrades[this.Name].bought);
+	}
 }
 BuyoutItem.prototype.CanAfford = function () {
 	return this.Price <= AvailableCookies();
@@ -761,10 +763,11 @@ PriceCalculator.prototype.CalculateUpgradeBCI = function (upgrade) {
 
 	var oldCPS = this.EstimatedCPS();
 
+	var bought = upgrade.bought;
 	var price = Math.round(upgrade.getPrice());
 	upgrade.bought = 1; Game.CalculateGains();
 	var newCPS = this.EstimatedCPS();
-	upgrade.bought = 0; Game.CalculateGains();
+	upgrade.bought = bought; Game.CalculateGains();
 
 	// Restore achievements function
 	Game.Win = GameWinBackup;

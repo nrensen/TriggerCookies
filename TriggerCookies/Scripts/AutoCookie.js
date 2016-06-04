@@ -853,7 +853,7 @@ AutoCookie.ClickReindeer = function () {
 /* Autobuys the next item. */
 AutoCookie.Autobuy = function () {
 	// Prevent buying while ascended.
-	if (!Game.AscendTimer && !Game.OnAscend) {
+	if (!Game.AscendTimer && !Game.OnAscend && !Game.upgradesToRebuild) {
 		var buyBuildings = AutoCookie.Actions['autobuildings'].Enabled;
 		var buyUpgrades = AutoCookie.Actions['autoupgrades'].Enabled;
 		var buyResearch = AutoCookie.Actions['autoresearch'].Enabled;
