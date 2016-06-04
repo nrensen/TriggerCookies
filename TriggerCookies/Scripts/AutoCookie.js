@@ -302,7 +302,6 @@ AutoCookie.WriteMenu = function (tab) {
 				'<label style="display: none">Disables the settings below until the cycle is complete</label>' +
 
 
-				//'<label id="' + iAuto('nextItem') + '"> Next ' + AutoCookie.NextItem.Type + ': ' + AutoCookie.NextItem.Name + '</label>' +
 				'</div>';
 		str +=
 		'<div class="listing">' +
@@ -411,13 +410,6 @@ AutoCookie.WriteMenu = function (tab) {
 }
 /* Writes the Auto-Cookie buttons. */
 AutoCookie.UpdateMenu = function () {
-
-	//lAuto('nextItem').innerHTML = (AutoCookie.NextItem.Type != 'invalid' ? ('Next ' + AutoCookie.NextItem.Type + ': ' + AutoCookie.NextItem.Name) : '');
-
-	if (lAuto('nextItem') != null) {
-		lAuto('nextItem').innerHTML = (AutoCookie.NextItem.Type != 'invalid' ? AutoCookie.NextItem.Name + (AutoCookie.NextItem.CanAfford() ? '' : ' <small>(' + Helper.Numbers.GetTime(AutoCookie.NextItem.Time * 1000, 4) + ')</small>') : 'N/A');
-		lAuto('nextType').innerHTML = 'Next ' + (AutoCookie.NextItem.Type != 'invalid' ? AutoCookie.NextItem.Type : 'item') + ' : ';
-	}
 
 	AutoCookie.UpdateAscendInfo();
 }
@@ -857,13 +849,13 @@ AutoCookie.ClickReindeer = function () {
 AutoCookie.Autobuy = function () {
 	// Prevent buying while ascended.
 	if (!Game.AscendTimer && !Game.OnAscend) {
-		AutoCookie.GoalItem = new BuyoutItem();
 		var buyBuildings = AutoCookie.Actions['autobuildings'].Enabled;
 		var buyUpgrades = AutoCookie.Actions['autoupgrades'].Enabled;
 		var buyResearch = AutoCookie.Actions['autoresearch'].Enabled;
 		var buySeasons = AutoCookie.Actions['autoseason'].Enabled;
 		var maintainSeason = (AutoCookie.Actions['maintainseason'].Enabled ? AutoCookie.MaintainSeason : '');
 		var bestItem = new BuyoutItem();
+		var goalItem = new BuyoutItem();
 
 		if (buyResearch) {
 			CalcCookie.Price.FindBestResearch(AutoCookie.GrandmapocalypseLevel);
@@ -874,45 +866,61 @@ AutoCookie.Autobuy = function () {
 			bestItem = CalcCookie.BestSeasonItem;
 		}
 		if ((buyBuildings || buyUpgrades) && (bestItem.Type == 'invalid' || !bestItem.CanAfford())) {
-			console.log("BuildingUpgrade");
+			//console.log("BuildingUpgrade");
 			if (buyBuildings && buyUpgrades) {
 				CalcCookie.Price.FindBestItem();
 				bestItem = CalcCookie.BestOverallItem;
-				AutoCookie.GoalItem = CalcCookie.BestOverallGoal;
-				console.log(bestItem.Name);
+				goalItem = CalcCookie.BestOverallGoal;
+				//console.log(bestItem.Name);
 			}
 			else if (buyBuildings) {
 				CalcCookie.Price.FindBuildingBCIs();
 				bestItem = CalcCookie.BuildingBCIs.bestItem;
 				if (CalcCookie.BuildingBCIs.timeItem.Type != 'invalid') {
 					bestItem = CalcCookie.BuildingBCIs.timeItem;
-					AutoCookie.GoalItem = CalcCookie.BuildingBCIs.bestItem;
+					goalItem = CalcCookie.BuildingBCIs.bestItem;
 				}
-				console.log(bestItem.Name);
+				//console.log(bestItem.Name);
 			}
 			else {
 				CalcCookie.Price.FindUpgradeBCIs(true, false);
 				bestItem = CalcCookie.UpgradeBCIs.bestItem;
 				if (CalcCookie.UpgradeBCIs.timeItem.Type != 'invalid') {
 					bestItem = CalcCookie.UpgradeBCIs.timeItem;
-					AutoCookie.GoalItem = CalcCookie.UpgradeBCIs.bestItem;
+					goalItem = CalcCookie.UpgradeBCIs.bestItem;
 				}
-				console.log(bestItem.Name);
+				//console.log(bestItem.Name);
 			}
 		}
-		
-		AutoCookie.NextItem = bestItem;
 
-		if (lAuto('nextItem') != null) {
-			//lAuto('nextItem').innerHTML = (AutoCookie.NextItem.Type != 'invalid' ? ('Next ' + AutoCookie.NextItem.Type + ': ' + AutoCookie.NextItem.Name) : '');
-			lAuto('nextItem').innerHTML = (bestItem.Type != 'invalid' ? bestItem.Name + (bestItem.CanAfford() ? '' : ' <small>(' + Helper.Numbers.GetTime(AutoCookie.NextItem.Time * 1000, 4) + (AutoCookie.GoalItem.Type != 'invalid' ? ' goal: ' + AutoCookie.GoalItem.Name : '') + ')</small>') : 'N/A');
-			lAuto('nextType').innerHTML = 'Next ' + (bestItem.Type != 'invalid' ? bestItem.Type : 'item') + ' : ';
+		if (AutoCookie.NextItem == null || AutoCookie.NextItem.Name != bestItem.Name ||
+		    AutoCookie.GoalItem == null || AutoCookie.GoalItem.Name != goalItem.Name) {
+			var msg = 'Next: ';
+			if (bestItem.Name == '')
+				msg += 'none';
+			else
+				msg += bestItem.Name + ' (' + Beautify(bestItem.Price) + ' cookies, ' +
+				    Helper.Numbers.GetTime(bestItem.Time * 1000, 4) + ', ' + Beautify(bestItem.BCI) + ')';
+			if (goalItem.Name != '')
+				msg += ' Goal: ' + goalItem.Name + ' (' + Beautify(goalItem.Price) +
+				    ' cookies, ' +  Helper.Numbers.GetTime(goalItem.Time * 1000, 4) + ', ' + Beautify(goalItem.BCI) + ')';
+			Helper.TimeLog(msg);
 		}
+
 		if (bestItem.Type != 'invalid') {
 			if (bestItem.CanAfford()) {
 				bestItem.Buy();
-				//console.log('Bought: ' + bestItem.Name);
+				Helper.TimeLog('Bought: ' + bestItem.Name + ' (' + Beautify(bestItem.Price) + ' cookies, ' + Beautify(bestItem.BCI) + ')');
+				bestItem = new BuyoutItem();
 			}
+		}
+
+		AutoCookie.NextItem = bestItem;
+		AutoCookie.GoalItem = goalItem;
+
+		if (lAuto('nextItem') != null) {
+			lAuto('nextItem').innerHTML = (bestItem.Type != 'invalid' ? bestItem.Name + (bestItem.CanAfford() ? '' : ' <small>(' + Helper.Numbers.GetTime(bestItem.Time * 1000, 4) + (AutoCookie.GoalItem.Type != 'invalid' ? ' goal: ' + AutoCookie.GoalItem.Name : '') + ')</small>') : 'N/A');
+			lAuto('nextType').innerHTML = 'Next ' + (bestItem.Type != 'invalid' ? bestItem.Type : 'item') + ' : ';
 		}
 	}
 

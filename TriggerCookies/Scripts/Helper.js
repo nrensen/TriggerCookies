@@ -148,6 +148,17 @@ Helper.Numbers.ParseInt = function (text, allowPlaceNames, canEndWith) {
 	return value;
 }
 
+Helper.TimeLog = function(msg) {
+	var d = new Date();
+	var timestamp = d.getFullYear() +
+	    '-' + ('0' + (d.getMonth() + 1)).slice(-2) +
+	    '-' + ('0' + d.getDate()).slice(-2) +
+	    ' ' + ('0' + d.getHours()).slice(-2) +
+	    ':' + ('0' + d.getMinutes()).slice(-2) +
+	    ':' + ('0' + d.getSeconds()).slice(-2);
+	console.log(timestamp + ' ' + msg);
+}
+
 Helper.Numbers.GetTime = function (time, format) {
 	var seconds = 0, minutes = 0, hours = 0;
 	var days = 0, weeks = 0;
