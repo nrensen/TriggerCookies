@@ -12,7 +12,7 @@ QUICK FUNCTIONS
 
 /* Gets the URL of the TriggerCookies Mod. */
 function GetTriggerCookiesURL() {
-	return 'http://trigger-death.github.io/TriggerCookies/';
+	return 'https://github.com/nrensen/TriggerCookies/raw/master/TriggerCookies/';
 }
 /* Returns true if the specified mod is loaded. */
 function IsModLoaded(name) {
@@ -21,7 +21,7 @@ function IsModLoaded(name) {
 /* Loads the mod from the same location as TriggerCookies if the mod hasn't been loaded yet. */
 function LoadTriggerCookiesMod(name) {
 	if (!IsModLoaded(name)) {
-		var url = GetTriggerCookiesURL() + 'Scripts/' + name + '.js';
+		var url = GetTriggerCookiesURL() + 'Scripts/Live/' + name + '.js';
 		Game.LoadMod(url);
 	}
 }

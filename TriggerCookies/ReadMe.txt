@@ -21,7 +21,7 @@ Author:         Robert Jordan
 Version:        v0.1.0.0
 Last Updated:   11/24/2014
 --------------------------------
-Repository:     https://github.com/trigger-death/CookieMods
+Repository:     https://github.com/nrensen/TriggerCookies/tree/master/TriggerCookies
 
 ================================================
  Game Requirements
@@ -50,13 +50,12 @@ Bookmarklet
 javascript: (function () {
 	console.log("Loading Trigger Cookies");
 
-	Game.LoadMod('https://cdn.rawgit.com/trigger-death/CookieMods/master/Scripts/TriggerCookies.js');
-	
-	Game.LoadMod('https://cdn.rawgit.com/trigger-death/CookieMods/master/Scripts/LayoutCookie.js');
-	Game.LoadMod('https://cdn.rawgit.com/trigger-death/CookieMods/master/Scripts/AutoCookie.js');
-	Game.LoadMod('https://cdn.rawgit.com/trigger-death/CookieMods/master/Scripts/StatCookie.js');
-	Game.LoadMod('https://cdn.rawgit.com/trigger-death/CookieMods/master/Scripts/CheatCookie.js');
-	Game.LoadMod('https://cdn.rawgit.com/trigger-death/CookieMods/master/Scripts/HotfixCookie.js');
+	Game.LoadMod('https://github.com/nrensen/TriggerCookies/raw/master/TriggerCookies/Scripts/TriggerCookies.js');
+	Game.LoadMod('https://github.com/nrensen/TriggerCookies/raw/master/TriggerCookies/Scripts/LayoutCookie.js');
+	Game.LoadMod('https://github.com/nrensen/TriggerCookies/raw/master/TriggerCookies/Scripts/AutoCookie.js');
+	Game.LoadMod('https://github.com/nrensen/TriggerCookies/raw/master/TriggerCookies/Scripts/StatCookie.js');
+	Game.LoadMod('https://github.com/nrensen/TriggerCookies/raw/master/TriggerCookies/Scripts/CheatCookie.js');
+	Game.LoadMod('https://github.com/nrensen/TriggerCookies/raw/master/TriggerCookies/Scripts/HotfixCookie.js');
 }());
 
 ================================================
@@ -69,14 +68,13 @@ javascript: (function () {
 		clearInterval(checkReady);
 		console.log("Loading Trigger Cookies");
 
-		Game.LoadMod('https://cdn.rawgit.com/trigger-death/CookieMods/master/Scripts/TriggerCookies.js');
-	
-		Game.LoadMod('https://cdn.rawgit.com/trigger-death/CookieMods/master/Scripts/LayoutCookie.js');
-		Game.LoadMod('https://cdn.rawgit.com/trigger-death/CookieMods/master/Scripts/AutoCookie.js');
-		Game.LoadMod('https://cdn.rawgit.com/trigger-death/CookieMods/master/Scripts/StatCookie.js');
-		Game.LoadMod('https://cdn.rawgit.com/trigger-death/CookieMods/master/Scripts/CheatCookie.js');
-		Game.LoadMod('https://cdn.rawgit.com/trigger-death/CookieMods/master/Scripts/HotfixCookie.js');
-	}
+		Game.LoadMod('https://github.com/nrensen/TriggerCookies/raw/master/TriggerCookies/Scripts/TriggerCookies.js');
+		Game.LoadMod('https://github.com/nrensen/TriggerCookies/raw/master/TriggerCookies/Scripts/LayoutCookie.js');
+		Game.LoadMod('https://github.com/nrensen/TriggerCookies/raw/master/TriggerCookies/Scripts/AutoCookie.js');
+		Game.LoadMod('https://github.com/nrensen/TriggerCookies/raw/master/TriggerCookies/Scripts/StatCookie.js');
+		Game.LoadMod('https://github.com/nrensen/TriggerCookies/raw/master/TriggerCookies/Scripts/CheatCookie.js');
+		Game.LoadMod('https://github.com/nrensen/TriggerCookies/raw/master/TriggerCookies/Scripts/HotfixCookie.js');
+		}
 	}, 100);
 }());
 

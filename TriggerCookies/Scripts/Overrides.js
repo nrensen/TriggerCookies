@@ -4,8 +4,8 @@ COOKIES CLICKER OVERRIDES
 
 // Author:       Robert Jordan
 // Written For:  v.1.0501 beta
-// Repository:   https://github.com/trigger-death/CookieMods
-// Raw File:     https://raw.githubusercontent.com/trigger-death/CookieMods/master/Overrides.js
+// Repository:   https://github.com/nrensen/TriggerCookies/tree/master/TriggerCookies
+// Raw File:     https://github.com/nrensen/TriggerCookies/raw/master/TriggerCookies/Scripts/Overrides.js
 
 /*=====================================================================================
 OVERRIDES DEFINITIONS

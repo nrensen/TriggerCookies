@@ -17,12 +17,12 @@ TriggerCookies is a large mod suite made in the style of [CookieMaster](https://
 ```javascript
 javascript: (function () {
     console.log("Loading Trigger Cookies");
-    Game.LoadMod('http://trigger-death.github.io/TriggerCookies/Scripts/TriggerCookies.js');
-    Game.LoadMod('http://trigger-death.github.io/TriggerCookies/Scripts/LayoutCookie.js');
-    Game.LoadMod('http://trigger-death.github.io/TriggerCookies/Scripts/AutoCookie.js');
-    Game.LoadMod('http://trigger-death.github.io/TriggerCookies/Scripts/StatCookie.js');
-    Game.LoadMod('http://trigger-death.github.io/TriggerCookies/Scripts/CheatCookie.js');
-    Game.LoadMod('http://trigger-death.github.io/TriggerCookies/Scripts/HotfixCookie.js');
+    Game.LoadMod('https://github.com/nrensen/TriggerCookies/raw/master/TriggerCookies/Scripts/TriggerCookies.js');
+    Game.LoadMod('https://github.com/nrensen/TriggerCookies/raw/master/TriggerCookies/Scripts/LayoutCookie.js');
+    Game.LoadMod('https://github.com/nrensen/TriggerCookies/raw/master/TriggerCookies/Scripts/AutoCookie.js');
+    Game.LoadMod('https://github.com/nrensen/TriggerCookies/raw/master/TriggerCookies/Scripts/StatCookie.js');
+    Game.LoadMod('https://github.com/nrensen/TriggerCookies/raw/master/TriggerCookies/Scripts/CheatCookie.js');
+    Game.LoadMod('https://github.com/nrensen/TriggerCookies/raw/master/TriggerCookies/Scripts/HotfixCookie.js');
 }());
 ```
 
@@ -34,12 +34,12 @@ javascript: (function () {
         if (typeof Game.ready !== 'undefined' && Game.ready) {
         clearInterval(checkReady);
         console.log("Loading Trigger Cookies");
-        Game.LoadMod('http://trigger-death.github.io/TriggerCookies/Scripts/TriggerCookies.js');
-        Game.LoadMod('http://trigger-death.github.io/TriggerCookies/Scripts/LayoutCookie.js');
-        Game.LoadMod('http://trigger-death.github.io/TriggerCookies/Scripts/AutoCookie.js');
-        Game.LoadMod('http://trigger-death.github.io/TriggerCookies/Scripts/StatCookie.js');
-        Game.LoadMod('http://trigger-death.github.io/TriggerCookies/Scripts/CheatCookie.js');
-        Game.LoadMod('http://trigger-death.github.io/TriggerCookies/Scripts/HotfixCookie.js');
+        Game.LoadMod('https://github.com/nrensen/TriggerCookies/raw/master/TriggerCookies/Scripts/TriggerCookies.js');
+        Game.LoadMod('https://github.com/nrensen/TriggerCookies/raw/master/TriggerCookies/Scripts/LayoutCookie.js');
+        Game.LoadMod('https://github.com/nrensen/TriggerCookies/raw/master/TriggerCookies/Scripts/AutoCookie.js');
+        Game.LoadMod('https://github.com/nrensen/TriggerCookies/raw/master/TriggerCookies/Scripts/StatCookie.js');
+        Game.LoadMod('https://github.com/nrensen/TriggerCookies/raw/master/TriggerCookies/Scripts/CheatCookie.js');
+        Game.LoadMod('https://github.com/nrensen/TriggerCookies/raw/master/TriggerCookies/Scripts/HotfixCookie.js');
     }}, 100);
 }());
 ```
@@ -52,9 +52,9 @@ javascript: (function () {
 
 ## Features
 
-* Modular Support: Take a look at [ExampleMod.js](https://github.com/trigger-death/trigger-death.github.io/blob/master/TriggerCookies/Scripts/ExampleMod.js).
+* Modular Support: Take a look at [ExampleMod.js](https://github.com/nrensen/TriggerCookies/tree/master/TriggerCookies/Scripts/ExampleMod.js).
 * Number Places: Write number places such as *billion*/*b*, *octillion*/*oc* in text boxes instead of entering in all those '0's.
-* Overrides: Comes with [Overrides.js](https://github.com/trigger-death/trigger-death.github.io/blob/master/TriggerCookies/Scripts/Overrides.js) which allows for handling overriding and appending to Cookie Clicker functions. Also outputs to the console log to see who is overriding functions and if conflicts occur.
+* Overrides: Comes with [Overrides.js](https://github.com/nrensen/TriggerCookies/raw/master/TriggerCookies/Scripts/Overrides.js) which allows for handling overriding and appending to Cookie Clicker functions. Also outputs to the console log to see who is overriding functions and if conflicts occur.
 * *Third-party* Achievement: Hey guess what!? This is a mod you're using! So why not receive the plugin shadow achievement?
 * Favicon: Set the favicon to a cookie, which it should have been all along.
 

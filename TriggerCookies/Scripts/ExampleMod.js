@@ -12,7 +12,7 @@ QUICK FUNCTIONS
 
 /* Gets the URL of the TriggerCookies Mod. */
 function GetTriggerCookiesURL() {
-	return 'http://trigger-death.github.io/TriggerCookies/';
+	return 'https://github.com/nrensen/TriggerCookies/raw/master/TriggerCookies/';
 }
 /* Returns true if the specified mod is loaded. */
 function IsModLoaded(name) {
