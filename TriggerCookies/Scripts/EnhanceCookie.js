@@ -496,8 +496,10 @@ EnhanceCookie.DrawCookies = function () {
 	var unit = (Math.round(Game.cookiesd) == 1 ? ' cookie' : ' cookies');
 	if (Game.cookiesd >= 1000000 && !Game.mobile)
 		unit = '<br>cookies';
-	var str = Beautify(Math.round(Game.cookiesd));
-	var str = str + unit + '<div style="font-size:50%;"' + (Game.cpsSucked > 0 ? ' class="warning"' : '') + '>per second : ' + Beautify(Game.cookiesPs * (1 - Game.cpsSucked), 1) + '</div>';//display cookie amount
+	var str = Beautify(Math.round(Game.cookiesd)) + unit;
+	if (Game.prefs.monospace)
+		str = '<span class="monospace">' + str + '</span>';
+	str += '<div style="font-size:50%;"' + (Game.cpsSucked > 0 ? ' class="warning"' : '') + '>per second : ' + Beautify(Game.cookiesPs * (1 - Game.cpsSucked), 1) + '</div>';//display cookie amount
 	l('cookies').innerHTML = str;
 	l('compactCookies').innerHTML = str;
 }
