@@ -697,7 +697,7 @@ StatWrinklers.prototype.WriteStats = function () {
 	Helper.Menu.WriteSectionMiddle() +
 
 	'<div class="listing"><b>Number of wrinklers : </b> <div id="' + iStat('numWrinklers') + '" class="priceoff">' + Beautify(this.NumWrinklers) +
-		(this.NumWrinklers == 10 ? ' <small>(maxed)</small>' : '') + '</div></div>' +
+		(this.NumWrinklers == Game.getWrinklersMax() ? ' <small>(maxed)</small>' : '') + '</div></div>' +
 	'<div class="listing"><b>Cookies sucked : </b> <div id="' + iStat('cookiesSucked') + '" class="price plain">' + Beautify(this.CookiesSucked) + '</div></div>' +
 	'<div class="listing"><b>Reward for popping :</b> <div id="' + iStat('cookiesSuckedReward') + '" class="price plain">' + Beautify(this.CookiesReward) + '</div></div>' +
 
@@ -714,7 +714,7 @@ StatWrinklers.prototype.UpdateStats = function () {
 	lStat('wrinklerMultiplier').innerHTML = Beautify(this.WrinklerMultiplier * 100) + '%';
 
 	lStat('numWrinklers').innerHTML = Beautify(this.NumWrinklers) +
-		(this.NumWrinklers == 10 ? ' <small>(maxed)</small>' : '')
+		(this.NumWrinklers == Game.getWrinklersMax() ? ' <small>(maxed)</small>' : '')
 	lStat('cookiesSucked').innerHTML = Beautify(this.CookiesSucked);
 	lStat('cookiesSuckedReward').innerHTML = Beautify(this.CookiesReward);
 }
