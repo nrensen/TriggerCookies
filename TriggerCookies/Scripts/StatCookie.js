@@ -119,7 +119,11 @@ StatCookie.Init = function () {
 StatCookie.Enable = function (firstTime) {
 	
 	if (firstTime) {
-
+		l('goldenCookie').removeEventListener('click', Game.goldenCookie.click);
+		l('goldenCookie').removeEventListener('touchend', Game.goldenCookie.click);
+		Overrides.OverrideFunction('Game.goldenCookie.click', 'StatGolden.Click', 'StatCookie');
+		Game.customLogic.push(StatGolden.Logic);
+		l('goldenCookie')[Game.clickStr] = Game.goldenCookie.click;
 	}
 
 	StatCookie.Enabled = true;
@@ -315,11 +319,17 @@ function StatGolden() {
 	this.NextCookieChain = 0;
 	this.NextCPSChain = 0;
 
-	this.LastEffectName = 'N/A';
-	this.LastFrenzyCombo = 0;
-	this.LastBlab = 0;
-	this.LastFrenzyComboTime = 0;
-	this.LastBlabTime = 0;
+	this.Effects = {};
+	this.Resets = 0;
+	this.Frenzy = 0;
+	this.FrenzyKey = '';
+	this.FrenzyEarn = 0;
+	this.FrenzyPower = 0;
+	this.ClickFrenzy = 0;
+	this.ClickFrenzyKey = '';
+	this.ClickFrenzyClicks = 0;
+	this.ClickFrenzyEarn = 0;
+	this.ClickFrenzyPower = 0;
 }
 StatGolden.prototype.WriteStats = function () {
 	this.Update();
@@ -332,11 +342,9 @@ StatGolden.prototype.WriteStats = function () {
 	'<div class="listing"><b>Golden cookie clicks :</b> <div id="' + iStat('goldenClicks') + '" class="priceoff">' + Beautify(Game.goldenClicksLocal) +
 		' <small>(all time : ' + Beautify(Game.goldenClicks) + ')</small></div></div>' +
 	'<div class="listing"><b>Golden cookies missed : </b> <div id="' + iStat('goldenMissed') + '" class="priceoff">' + Beautify(Game.missedGoldenClicks) + '</div></div>' +
-	'<div class="listing"><b>Last effect : </b> <div id="' + iStat('lastEffect') + '" class="priceoff">' + this.LastEffectName + '</div></div>' +
-	'<div class="listing"><b>Last click/frenzy combo : </b> <div id="' + iStat('lastCombo') + '" class="priceoff">' + (this.LastFrenzyComboTime != 0 ? (this.LastFrenzyCombo == 0 ? 'Now' : Helper.Numbers.GetTime(this.LastFrenzyCombo, 4)) : 'Never') + '</div></div>' +
-	'<div class="listing"><b>Last blab effect : </b> <div id="' + iStat('lastCombo') + '" class="priceoff">' + (this.LastBlabTime != 0 ? (this.LastBlad == 0 ? 'Now' : Helper.Numbers.GetTime(this.LastBlab, 4)) : 'Never') + '</div></div>' +
+	'<div class="listing"><b>Last effect : </b> <div id="' + iStat('lastEffect') + '" class="priceoff">N/A</div></div>' +
 
-	Helper.Menu.WriteSectionMiddle() +
+	'<div id="' + iStat('goldenEffects') + '" class="priceoff"></div>' +
 
 	'<div class="listing"><b>Lucky cookies required : </b> <div id="' + iStat('luckyRequired') + '" class="price plain">' + Beautify(this.LuckyRequired) + '</div></div>' +
 	'<div class="listing"><b>Lucky+Frenzy cookies required : </b> <div id="' + iStat('luckyFrenzyRequired') + '" class="price plain">' + Beautify(this.LuckyFrenzyRequired) + '</div></div>' +
@@ -355,30 +363,8 @@ StatGolden.prototype.WriteStats = function () {
 
 	return str;
 }
-StatGolden.prototype.UpdateStats = function () {
-	this.Update();
-
-	lStat('goldenClicks').innerHTML = Beautify(Game.goldenClicksLocal) +
-		' <small>(all time : ' + Beautify(Game.goldenClicks) + ')</small>';
-	lStat('goldenMissed').innerHTML = Beautify(Game.missedGoldenClicks);
-	lStat('lastEffect').innerHTML = this.LastEffectName;
-
-	lStat('luckyRequired').innerHTML = Beautify(this.LuckyRequired);
-	lStat('luckyFrenzyRequired').innerHTML = Beautify(this.LuckyFrenzyRequired);
-	lStat('luckyReward').innerHTML = Beautify(this.LuckyReward);
-	lStat('luckyFrenzyReward').innerHTML = Beautify(this.LuckyFrenzyReward);
-
-	lStat('maxCookieChain').innerHTML = Beautify(this.MaxCookieChain);
-	lStat('nextCookieChain').innerHTML = Beautify(this.NextCookieChain);
-	lStat('nextCPSChain').innerHTML = Beautify(this.NextCPSChain);
-
-	lStat('lastCombo').innerHTML = (this.LastFrenzyComboTime != 0 ? (this.LastFrenzyCombo == 0 ? 'Now' : Helper.Numbers.GetTime(this.LastFrenzyCombo, 4)) : 'Never');
-	lStat('lastCombo').innerHTML = (this.LastBlabTime != 0 ? (this.LastBlad == 0 ? 'Now' : Helper.Numbers.GetTime(this.LastBlab, 4)) : 'Never');
-}
-StatGolden.prototype.Update = function () {
-
-	// Last Effect
-	var effectnames = {
+StatGolden.GetEffectName = function(effect) {
+	var names = {
 		'multiply cookies': 'Lucky',
 		'ruin cookies': 'Ruin',
 		'clot': 'Clot',
@@ -388,24 +374,51 @@ StatGolden.prototype.Update = function () {
 		'chain cookie': 'Cookie Chain',
 		'dragon harvest': 'Dragon Harvest',
 		'dragonflight': 'Dragon Flight',
-		'blab': 'Blab <small>(you lucky bastard)</small>'
+		'blab': 'Blab'
 	};
-	this.LastEffectName = (Game.goldenCookie.last.length != 0 ? effectnames[Game.goldenCookie.last] : 'N/A');
+	return effect.split('+').map(item => names[item] || item).join('+');
+}
+StatGolden.prototype.UpdateStats = function () {
+	this.Update();
 
-	if (Game.goldenCookie.last == 'blab') {
-		this.LastBlabTime = new Date().getTime();
-		this.LastBlab = 0;
-	}
-	else {
-		this.LastBlab = new Date().getTime() - this.LastBlabTime;
-	}
-	if (Game.frenzy > 0 && Game.clickFrenzy > 0) {
-		this.LastFrenzyComboTime = new Date().getTime();
-		this.LastFrenzyCombo = 0;
-	}
-	else {
-		this.LastFrenzyCombo = new Date().getTime() - this.LastFrenzyComboTime;
-	}
+	lStat('goldenClicks').innerHTML = Beautify(Game.goldenClicksLocal) +
+		' <small>(all time : ' + Beautify(Game.goldenClicks) + ')</small>';
+	lStat('goldenMissed').innerHTML = Beautify(Game.missedGoldenClicks);
+	if (Game.goldenCookie.last == '')
+		lStat('lastEffect').innerHTML = 'None';
+	else
+		lStat('lastEffect').innerHTML = StatGolden.GetEffectName(Game.goldenCookie.last);
+
+	var effects = {}
+	Object.keys(this.Effects).forEach(key =>
+		effects[StatGolden.GetEffectName(key)] = this.Effects[key]);
+	var str = Object.keys(effects).sort().reduce((str, name) => {
+		var effect = effects[name];
+		str += '<div class="listing">' +
+		    '<b>' + name + ' : </b>' +
+		    '<div class="priceoff">' + Beautify(effect.count) + '</div>' + ' for';
+		if (effect.duration > 0)
+			str += ' <div class="priceoff">' + Helper.Numbers.GetTime(effect.duration / Game.fps * 1000, 3) + '</div>';
+		if (effect.cookies != 0)
+			str += ' <div class="price plain">' + Beautify(effect.cookies) + '</div>';
+		str += '</div>';
+		return str;
+	}, '');
+
+	if (str != '')
+		str = Helper.Menu.WriteSectionMiddle() + str + Helper.Menu.WriteSectionMiddle();
+	lStat('goldenEffects').innerHTML = str;
+
+	lStat('luckyRequired').innerHTML = Beautify(this.LuckyRequired);
+	lStat('luckyFrenzyRequired').innerHTML = Beautify(this.LuckyFrenzyRequired);
+	lStat('luckyReward').innerHTML = Beautify(this.LuckyReward);
+	lStat('luckyFrenzyReward').innerHTML = Beautify(this.LuckyFrenzyReward);
+
+	lStat('maxCookieChain').innerHTML = Beautify(this.MaxCookieChain);
+	lStat('nextCookieChain').innerHTML = Beautify(this.NextCookieChain);
+	lStat('nextCPSChain').innerHTML = Beautify(this.NextCPSChain);
+}
+StatGolden.prototype.Update = function () {
 
 	// Lucky
 	this.LuckyRequired = StatCookie.CookieStats.BaseCPS * 6000;
@@ -447,7 +460,120 @@ StatGolden.prototype.Update = function () {
 		nextMoni = Math.max(digit, Math.min(Math.floor(1 / 9 * Math.pow(10, chain + 1) * digit), maxPayout));
 	}
 	this.MaxCookieChain = moni;
-	
+
+	if (Game.resets != this.Resets) {
+		this.Effects = {};
+		this.Resets = Game.resets;
+	}
+}
+
+StatGolden.prototype.Accumulate = function (oldfrenzy) {
+	if (this.ClickFrenzyKey) {
+		var key = this.ClickFrenzyKey;
+		var effect = this.Effects[key];
+		var duration = this.ClickFrenzy - Game.clickFrenzy;
+		effect.duration += duration;
+		var earn = Game.computedMouseCps *
+		    (Game.cookieClicks - this.ClickFrenzyClicks) *
+		    (1 - 1 / this.ClickFrenzyPower);
+		this.ClickFrenzyClicks = Game.cookieClicks;
+		effect.cookies += earn;
+		this.ClickFrenzyEarn += earn;
+		this.ClickFrenzy = Game.clickFrenzy;
+		if (this.ClickFrenzy == 0) {
+			this.ClickFrenzyKey = '';
+			Helper.TimeLog(StatGolden.GetEffectName(key) +
+			    ' ended: ' + Beautify(this.ClickFrenzyEarn) +
+			    ' cookies');
+		}
+	}
+
+	if (this.FrenzyKey) {
+		var key = this.FrenzyKey;
+		var effect = this.Effects[key];
+		var interrupt = oldfrenzy !== undefined;
+		var duration = this.Frenzy -
+		    (interrupt ? oldfrenzy : Game.frenzy);
+		effect.duration += duration;
+		var nwrinklers = 0;
+		for (var i in Game.wrinklers)
+			if (Game.wrinklers[i].phase == 2)
+				nwrinklers++;
+		var earn = Game.cookiesPs / Game.fps *
+		    (1 - Game.cpsSucked + nwrinklers * Game.cpsSucked) *
+		    duration * (1 - 1 / this.FrenzyPower);
+		effect.cookies += earn;
+		this.FrenzyEarn += earn;
+		this.Frenzy = Game.frenzy;
+		if (this.Frenzy == 0 || interrupt) {
+			this.FrenzyKey = '';
+			var action = interrupt ? 'interrupted' : 'ended';
+			Helper.TimeLog(StatGolden.GetEffectName(key) + ' ' +
+			    action + ': ' + Beautify(this.FrenzyEarn) +
+			    ' cookies');
+		}
+	}
+}
+StatGolden.Click = function(event, force) {
+	var gc = Game.goldenCookie;
+	var oldchain = gc.chain;
+	var oldcookies = Game.cookies;
+	var oldfrenzy = Game.frenzy;
+	var oldclickFrenzy = Game.clickFrenzy;
+	var oldclicks = Game.goldenClicks;
+	var duration = 0;
+
+	Overrides.Backup.Functions['Game.goldenCookie.click'].func(event,force);
+
+	if (Game.goldenClicks == oldclicks)
+		return;
+
+	var me = StatCookie.GoldenStats;
+	var earn = Game.cookies - oldcookies;
+	var key = gc.last;
+	if (Game.frenzy > 0 && (earn != 0 || Game.clickFrenzy > oldclickFrenzy))
+		key += '+' + me.FrenzyKey;
+	var effect = me.Effects[key];
+	if (effect === undefined)
+		me.Effects[key] = effect =
+		    { count: 0, cookies: 0, duration: 0 };
+
+	if (oldchain == 0)
+		effect.count++;
+
+	var msg = StatGolden.GetEffectName(key);
+
+	if (earn != 0) {
+		effect.cookies += earn;
+		msg += ': ' + Beautify(earn) + ' cookies';
+		if (gc.last == 'chain cookie' && gc.chain == 0)
+			msg += ' (total: ' + Beautify(gc.total) +
+			    ' cookies)';
+	} else if (Game.clickFrenzy > oldclickFrenzy) {
+		me.ClickFrenzyKey = key;
+		me.ClickFrenzy = Game.clickFrenzy;
+		me.ClickFrenzyClicks = Game.cookieClicks;
+		me.ClickFrenzyPower = Game.clickFrenzyPower;
+		me.ClickFrenzyEarn = 0;
+		duration = Game.clickFrenzy / Game.fps;
+		msg += ' started: ' + duration + 's';
+	} else if (gc.last != 'blab') {
+		// interruped frenzy
+		if (me.FrenzyKey)
+			me.Accumulate(oldfrenzy);
+		me.FrenzyKey = key;
+		me.Frenzy = Game.frenzy;
+		me.FrenzyPower = Game.frenzyPower;
+		me.FrenzyEarn = 0;
+		duration = Game.frenzy / Game.fps;
+		msg += ' started: ' + duration + 's';
+	}
+
+	Helper.TimeLog(msg);
+}
+StatGolden.Logic = function()
+{
+	StatCookie.GoldenStats.Accumulate();
 }
 
 //#endregion
