@@ -826,13 +826,15 @@ AutoCookie.Autobuy = function () {
 		var buyBuildings = AutoCookie.Actions['autobuildings'].Enabled;
 		var buyUpgrades = AutoCookie.Actions['autoupgrades'].Enabled;
 		var buyResearch = AutoCookie.Actions['autoresearch'].Enabled;
+		var maintainPledge = AutoCookie.Actions['maintainpledge'].Enabled;
+		var applyCovenant = AutoCookie.Actions['maintainelder'].Enabled;
 		var buySeasons = AutoCookie.Actions['autoseason'].Enabled;
 		var maintainSeason = (AutoCookie.Actions['maintainseason'].Enabled ? AutoCookie.MaintainSeason : '');
 		var bestItem = new BuyoutItem();
 		var goalItem = new BuyoutItem();
 
 		if (buyResearch) {
-			CalcCookie.Price.FindBestResearch(AutoCookie.GrandmapocalypseLevel);
+			CalcCookie.Price.FindBestResearch(AutoCookie.GrandmapocalypseLevel, maintainPledge, applyCovenant);
 			bestItem = CalcCookie.BestResearchItem;
 		}
 		if ((buySeasons || maintainSeason != '') && (bestItem.Type == 'invalid' || !bestItem.CanAfford())) {

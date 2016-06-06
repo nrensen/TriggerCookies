@@ -915,7 +915,7 @@ PriceCalculator.prototype.FindUpgradeBCIs = function (force, allowbuildings) {
 
 	CalcCookie.UpgradeBCIs = { bestItem: bestItem, timeItem: timeItem, bestBCI: bestBCI, worstBCI: worstBCI, values: upgradeBCIs };
 }
-PriceCalculator.prototype.FindBestResearch = function (grandmapocalypseLevel) {
+PriceCalculator.prototype.FindBestResearch = function (grandmapocalypseLevel, pledge, applyCovenant) {
 	var bestItem = new BuyoutItem();
 
 	for (var i in this.Research) {
@@ -930,6 +930,22 @@ PriceCalculator.prototype.FindBestResearch = function (grandmapocalypseLevel) {
 				bestItem = new BuyoutItem(name, 'upgrade', 15, info.price, info.bci, info.income, info.time);
 				break;
 			}
+		}
+	}
+
+	if (applyCovenant && bestItem.Type == 'invalid' && Game.season != 'halloween') {
+		var upgrade = Game.Upgrades['Elder Covenant'];
+		if (upgrade.unlocked && !upgrade.bought) {
+			var info = this.CalculateUpgradeBCI(upgrade);
+			bestItem = new BuyoutItem(upgrade.name, 'upgrade', 15, info.price, info.bci, info.income, info.time);
+		}
+	}
+
+	if (pledge && bestItem.Type == 'invalid' && Game.season != 'halloween') {
+		var upgrade = Game.Upgrades['Elder Pledge'];
+		if (upgrade.unlocked && !upgrade.bought) {
+			var info = this.CalculateUpgradeBCI(upgrade);
+			bestItem = new BuyoutItem(upgrade.name, 'upgrade', 15, info.price, info.bci, info.income, info.time);
 		}
 	}
 
