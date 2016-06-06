@@ -122,8 +122,10 @@ StatCookie.Enable = function (firstTime) {
 		l('goldenCookie').removeEventListener('click', Game.goldenCookie.click);
 		l('goldenCookie').removeEventListener('touchend', Game.goldenCookie.click);
 		Overrides.OverrideFunction('Game.goldenCookie.click', 'StatGolden.Click', 'StatCookie');
+		Overrides.OverrideFunction('Game.seasonPopup.click', 'StatSeasons.Click', 'StatCookie');
 		Game.customLogic.push(StatGolden.Logic);
 		l('goldenCookie')[Game.clickStr] = Game.goldenCookie.click;
+		l('seasonPopup')[Game.clickStr] = Game.seasonPopup.click;
 	}
 
 	StatCookie.Enabled = true;
@@ -755,6 +757,8 @@ function StatSeasons() {
 	this.HeartCookies = 0;
 	this.EasterEggs = 0;
 	this.RareEggs = 0;
+	this.Reindeer = {};
+	this.Resets = 0;
 
 	this.Lists = {};
 	this.Lists.SantaLevels = ['Festive test tube', 'Festive ornament', 'Festive wreath', 'Festive tree', 'Festive present', 'Festive elf fetus', 'Elf toddler', 'Elfling', 'Young elf', 'Bulky elf', 'Nick', 'Santa Claus', 'Elder Santa', 'True Santa', 'Final Claus'];
@@ -784,9 +788,7 @@ StatSeasons.prototype.WriteStats = function () {
 	str +=
 	'<div class="listing"><b>Current season : </b> <div id="' + iStat('currentSeason') + '" class="priceoff">' + seasonNames[Game.season] + (Game.seasonT > 0 && Game.season != '' ? ' (time remaining: ' + Helper.Numbers.GetTime(Game.seasonT / Game.fps * 1000, 3) + ')' : '') + '</div></div>' +
 
-	'<div class="listing"><b>Reindeer found : </b> <div id="' + iStat('reindeerFound') + '" class="priceoff">' + Beautify(Game.reindeerClicked) + '</div></div>' +
-
-	Helper.Menu.WriteSectionMiddle() +
+	'<div id="' + iStat('reindeerFound') + '" class="priceoff"></div>' +
 
 	// Christmas
 	'<div class="listing"><b>Santa level : </b> <div id="' + iStat('santaLevel') + '" class="priceoff">' + Beautify(this.SantaLevel) + '/' + Beautify(15) + (this.SantaLevel > 0 ? ' ' + this.Lists.SantaLevels[this.SantaLevel - 1] : '') + '</div></div>' +
@@ -822,7 +824,24 @@ StatSeasons.prototype.UpdateStats = function () {
 	};
 
 	lStat('currentSeason').innerHTML = seasonNames[Game.season] + (Game.seasonT > 0 && Game.season != '' ? ' (time remaining: ' + Helper.Numbers.GetTime(Game.seasonT / Game.fps * 1000, 3) + ')' : '');
-	lStat('reindeerFound').innerHTML = Beautify(Game.reindeerClicked);
+
+	var reindeer = {}
+	Object.keys(this.Reindeer).forEach(key =>
+		reindeer[StatGolden.GetEffectName(key)] = this.Reindeer[key]);
+	var str = Object.keys(reindeer).sort().reduce((str, name) => {
+		var deer = reindeer[name];
+		str += '<div class="listing">' +
+		    '<b>' + name + ' : </b>' +
+		    '<div class="priceoff">' + Beautify(deer.count) + '</div>' + ' for';
+		if (deer.cookies != 0)
+			str += ' <div class="price plain">' + Beautify(deer.cookies) + '</div>';
+		str += '</div>';
+		return str;
+	}, '');
+
+	if (str != '')
+		str = Helper.Menu.WriteSectionMiddle() + str + Helper.Menu.WriteSectionMiddle();
+	lStat('reindeerFound').innerHTML = str;
 
 	lStat('santaLevel').innerHTML = Beautify(this.SantaLevel) + '/' + Beautify(15) + (this.SantaLevel > 0 ? ' ' + this.Lists.SantaLevels[this.SantaLevel - 1] : '');
 	lStat('santaDrops').innerHTML = Beautify(this.SantaDrops) + '/' + Beautify(this.Lists.SantaDrops.length);
@@ -887,6 +906,33 @@ StatSeasons.prototype.Update = function () {
 	for (var i = 0; i < this.Lists.RareEggs.length; i++) {
 		var name = this.Lists.RareEggs[i];
 		if (Game.Has(name) || (name == 'Chocolate egg' && Game.HasUnlocked('Chocolate egg'))) this.RareEggs++;
+	}
+
+	if (Game.resets != this.Resets) {
+		this.Reindeer = {};
+		this.Resets = Game.resets;
+	}
+}
+StatSeasons.Click = function() {
+	var cookies = Game.cookies;
+	var clicks = Game.reindeerClicked;
+
+	Overrides.Backup.Functions['Game.seasonPopup.click'].func();
+
+	if (Game.reindeerClicked > clicks) {
+		var me = StatCookie.SeasonStats;
+		var key = 'Reindeer';
+		if (StatCookie.GoldenStats.FrenzyKey)
+			key += '+' + StatCookie.GoldenStats.FrenzyKey;
+
+		var reindeer = me.Reindeer[key];
+		if (reindeer === undefined)
+			me.Reindeer[key] = reindeer = { count: 0, cookies: 0 };
+		var earn = Game.cookies - cookies;
+		reindeer.count++;
+		reindeer.cookies += earn;
+		Helper.TimeLog(StatGolden.GetEffectName(key) + ': ' +
+		    Beautify(earn) + ' cookies');
 	}
 }
 

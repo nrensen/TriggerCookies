@@ -810,44 +810,13 @@ AutoCookie.PopWrinklers = function () {
 }
 /* Clicks a reindeer if one exists. */
 AutoCookie.ClickReindeer = function () {
-	// This is what happens when a reindeer is clicked. There's no function for it.
-	var me = Game.seasonPopup;
-	if (me.life > 0) {
-		if (me.type == 'reindeer') {
-			me.toDie = 1;
-			Game.reindeerClicked++;
-
-			var moni = Math.max(25, Game.cookiesPs * 60 * 1); //1 minute of cookie production, or 25 cookies - whichever is highest
-			if (Game.Has('Ho ho ho-flavored frosting'))
-				moni *= 2;
-			Game.Earn(moni);
-
-			var failRate = 0.8;
-			var cookie = '';
-			if (Game.HasAchiev('Let it snow'))
-				failRate = 0.6;
-			if (Game.Has('Santa\'s bottomless bag'))
-				failRate *= 0.9;
-			if (Game.Has('Starsnow'))
-				failRate *= 0.95;
-			if (Math.random() > failRate) {//christmas cookie drops
-				cookie = choose(['Christmas tree biscuits', 'Snowflake biscuits', 'Snowman biscuits', 'Holly biscuits', 'Candy cane biscuits', 'Bell biscuits', 'Present biscuits']);
-				if (!Game.HasUnlocked(cookie) && !Game.Has(cookie)) {
-					Game.Unlock(cookie);
-				}
-				else cookie = '';
-			}
-
-			if (Game.prefs.popups)
-				Game.Popup('You found ' + choose(['Dasher', 'Dancer', 'Prancer', 'Vixen', 'Comet', 'Cupid', 'Donner', 'Blitzen', 'Rudolph']) + '!<br>The reindeer gives you ' + Beautify(moni) + ' cookies.' + (cookie == '' ? '' : '<br>You are also rewarded with ' + cookie + '!'));
-			else
-				Game.Notify('You found ' + choose(['Dasher', 'Dancer', 'Prancer', 'Vixen', 'Comet', 'Cupid', 'Donner', 'Blitzen', 'Rudolph']) + '!', 'The reindeer gives you ' + Beautify(moni) + ' cookies.' + (cookie == '' ? '' : '<br>You are also rewarded with ' + cookie + '!'), [12, 9], 6);
-
-			l('seasonPopup').style.display = 'none';
-			me.minTime = me.getMinTime();
-			me.maxTime = me.getMaxTime();
-		}
-	}
+	if (Game.AscendTimer || Game.OnAscend)
+		return;
+	if (Game.seasonPopup.life == 0 || Game.seasonPopup.type != 'reindeer')
+		return;
+	var click = Game.Click;
+	Game.seasonPopup.click();
+	Game.Click = click;
 }
 
 /* Autobuys the next item. */
