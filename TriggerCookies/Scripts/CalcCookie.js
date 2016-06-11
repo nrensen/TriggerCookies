@@ -706,24 +706,30 @@ function PriceCalculator() {
 PriceCalculator.prototype.EstimatedCPS = function () {
 	return Game.cookiesPs * (1 - Game.cpsSucked) + (CalcCookie.ClicksPerSecond * Game.computedMouseCps);
 }
+PriceCalculator.prototype.CalculateBCI = function(price, oldCPS, newCPS) {
+	// Adapted from frozen cookies plugin
+	var bci = price / (newCPS - oldCPS);
+	if (oldCPS > 0)
+		bci += 1.15 * Math.max(0, price - AvailableCookies()) / oldCPS;
+	return bci;
+}
 PriceCalculator.prototype.CalculateBuildingBCI = function (building) {
 	// Prevent achievements from testing building CPS
 	var GameWinBackup = Game.Win;
 	Game.Win = function () { };
 
-	var oldCPS = this.EstimatedCPS();
-
 	var price = Math.round(building.getPrice());
 	building.amount++; Game.CalculateGains();
 	var newCPS = this.EstimatedCPS();
 	building.amount--; Game.CalculateGains();
+	var oldCPS = this.EstimatedCPS();
 
 	// Restore achievements function
 	Game.Win = GameWinBackup;
 
 	return {
-		bci: price / (newCPS - oldCPS),
-		income: Math.round(newCPS - oldCPS),
+		bci: this.CalculateBCI(price, oldCPS, newCPS),
+		income: newCPS - oldCPS,
 		cps: newCPS,
 		price: price,
 		afford: (price <= AvailableCookies()),
@@ -735,19 +741,18 @@ PriceCalculator.prototype.CalculateUpgradeBCI = function (upgrade) {
 	var GameWinBackup = Game.Win;
 	Game.Win = function () { };
 
-	var oldCPS = this.EstimatedCPS();
-
 	var bought = upgrade.bought;
 	var price = Math.round(upgrade.getPrice());
 	upgrade.bought = 1; Game.CalculateGains();
 	var newCPS = this.EstimatedCPS();
 	upgrade.bought = bought; Game.CalculateGains();
+	var oldCPS = this.EstimatedCPS();
 
 	// Restore achievements function
 	Game.Win = GameWinBackup;
 
 	return {
-		bci: price / (newCPS - oldCPS),
+		bci: this.CalculateBCI(price, oldCPS, newCPS),
 		income: newCPS - oldCPS,
 		cps: newCPS,
 		price: price,
