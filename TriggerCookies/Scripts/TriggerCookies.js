@@ -130,8 +130,6 @@ TriggerCookies.Init = function () {
 		l('menu').parentNode.appendChild(menu);
 		menu.innerHTML = str;
 
-		Game.customTickers.push(function () { return ['Trigger Cookies v1.0.2.6 beta hotfix released! Check out the changelog from the mods menu.']; });
-
 		// States that this mod has been loaded.
 		TriggerCookies.Loaded = true;
 
