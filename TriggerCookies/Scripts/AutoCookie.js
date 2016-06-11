@@ -114,8 +114,7 @@ AutoCookie.Init = function () {
 AutoCookie.Enable = function (firstTime) {
 	
 	if (firstTime) {
-
-
+		Game.customLogic.push(AutoCookie.InstantClickLogic);
 	}
 	AutoCookie.Actions['autobuy'].Enable(false);
 	AutoCookie.Actions['checkautoclick'].Enable(false);
@@ -761,19 +760,28 @@ AutoCookie.AutoClick = function () {
 	Game.ClickCookie();
 	Game.Click = click;
 }
-AutoCookie.InstantClick = function () {
-	if (Game.OnAscend) { }
-	else if (new Date().getTime() - Game.lastClick < 1000 / 250) { }
-	else
-	{
-		var moni = Game.computedMouseCps * AutoCookie.AutoClickRate / 2;
-		Game.Earn(moni);
-		Game.handmadeCookies += moni;
+AutoCookie.LastClick = new Date().getTime();
+AutoCookie.InstantClickLogic = function () {
+	if (Game.AscendTimer || Game.OnAscend)
+		return;
 
-		Game.cookieClicks += AutoCookie.AutoClickRate / 2;
-		Game.lastClick = new Date().getTime() + 490;
-	}
+	if (!AutoCookie.Actions['instantclick'].Enabled)
+		return;
+
+	var time = new Date().getTime();
+	var delta = time - AutoCookie.LastClick;
+	AutoCookie.LastClick = time;
+
+	var clicks = delta / 1000 * AutoCookie.AutoClickRate;
+	var moni = Game.computedMouseCps * clicks;
+	Game.Earn(moni);
+	Game.handmadeCookies += moni;
+	Game.cookieClicks += clicks;
 }
+AutoCookie.ToggleInstantClick = function() {
+	AutoCookie.LastClick = new Date().getTime();
+}
+
 /* Clicks the golden cookies. */
 AutoCookie.ClickGoldenCookies = function () {
 	// Prevent dealing with golden cookies while ascended.
@@ -1335,7 +1343,7 @@ AutoCookie.Actions = {
 
 	autoclick: new AutoCookieAction('Auto Click', null, [12, 0], 'toggle', false, 4, AutoCookie.AutoClick, true, null, null, null,
 		function () { AutoCookie.Actions['instantclick'].Disable(false); AutoCookie.SetButtonVisual('instantclick'); }),
-	instantclick: new AutoCookieAction('Instant Click', null, [12, 0], 'toggle', false, 500, AutoCookie.InstantClick, true, null, null, null,
+	instantclick: new AutoCookieAction('Instant Click', null, [12, 0], 'toggle', false, 0, AutoCookie.ToggleInstantClick, true, null, null, null,
 		function () { AutoCookie.Actions['autoclick'].Disable(false); AutoCookie.SetButtonVisual('autoclick'); }),
 
 	slow: new AutoCookieAction('Slow Click', null, [11, 0], 'toggle', false, 300, AutoCookie.AutoClick, true),
@@ -1406,4 +1414,3 @@ LAUNCH AUTO-COOKIE
 
 // Launch Auto-Cookie
 AutoCookie.Init();
-
