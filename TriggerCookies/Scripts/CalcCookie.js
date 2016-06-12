@@ -270,8 +270,8 @@ CalcCookie.BuildingTooltipBCI = function () {
 	'<div class="description">' + desc + '</div>' +
 	(CalcCookie.Actions['buildingbci'].Enabled ? 
 		'<div class="data" ' + (me.totalCookies > 0 ? 'style="padding-bottom: 0px;"' : '') + '>' +
-		('&bull; ' + ('BCI:'.fontcolor(me.bciColor) + ' <b>' + Beautify(me.bci).fontcolor(me.bciColor) + '</b><br>')) +
-		('&bull; ' + ('Income:' + ' <b>' + Beautify(me.income) + '</b><br>')) +
+		('&bull; ' + ('Payback time:'.fontcolor(me.bciColor) + ' <b>' + Helper.Numbers.GetTime(me.bci * 1000, 4).fontcolor(me.bciColor) + '</b><br>')) +
+		('&bull; ' + ('CPS gain:' + ' <b>' + Beautify(me.income) + '</b><br>')) +
 		(me.timeLeft > 0 ? '&bull; ' + ('Time Left:' + ' <b>' + Helper.Numbers.GetTime(me.timeLeft * 1000, 4) + '</b><br>') : '') : '') +
 	(me.totalCookies > 0 ? (
 		'</div><div class="data">' +
@@ -286,8 +286,8 @@ CalcCookie.UpgradeTooltipBCI = function () {
 	var me = this;
 	return '<div style="min-width:200px;"><div style="float:right;"><span class="price">' + Beautify(Math.round(me.getPrice())) + '</span></div><small>' + (me.pool == 'toggle' ? '[Togglable]' : '[Upgrade]') + '</small><div class="name">' + me.name + '</div><div class="description">' + me.desc + '</div>' +
 		'<div class="data">' +
-		'&bull; ' + ('BCI:'.fontcolor(me.bciColor) + ' <b>' + ((isFinite(me.bci) && !isNaN(me.bci)) ? Beautify(me.bci) : 'N/A').fontcolor(me.bciColor) + '</b><br>') +
-		'&bull; ' + ('Income:' + ' <b>' + ((isFinite(me.income) && !isNaN(me.income)) ? Beautify(me.income) : 'N/A') + '</b><br>') +
+		'&bull; ' + ('Payback time:'.fontcolor(me.bciColor) + ' <b>' + ((isFinite(me.bci) && !isNaN(me.bci)) ? Helper.Numbers.GetTime(me.bci * 1000, 4) : 'N/A').fontcolor(me.bciColor) + '</b><br>') +
+		'&bull; ' + ('CPS gain:' + ' <b>' + ((isFinite(me.income) && !isNaN(me.income)) ? Beautify(me.income) : 'N/A') + '</b><br>') +
 		(me.timeLeft > 0 ? ('&bull; ' + ('Time Left:' + ' <b>' + Helper.Numbers.GetTime(me.timeLeft * 1000, 4) + '</b><br>')) : '') +
 		'</div></div>';
 }
