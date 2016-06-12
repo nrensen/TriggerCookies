@@ -93,7 +93,7 @@ TriggerCookies.Init = function () {
 		Overrides.OverrideFunction('Game.ShowMenu', 'TriggerCookies.ShowMenu', 'TriggerCookies');
 		Overrides.OverrideFunction('Game.UpdateMenu', 'TriggerCookies.UpdateMenu', 'TriggerCookies');
 		Overrides.OverrideFunction('Game.WriteSave', 'TriggerCookies.WriteSave', 'TriggerCookies');
-		Overrides.AppendFunction('Game.Logic', 'TriggerCookies.Logic', null, 'TriggerCookies');
+		Game.customLogic.push(TriggerCookies.Logic);
 		
 		LoadStyleSheet('TriggerCookies');
 		TriggerCookies.ChangeLogButton();
