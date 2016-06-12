@@ -340,21 +340,14 @@ CalcCookie.RefreshUpgrades = function() {
 
 /* Gets the click rate of the big cookie. */
 CalcCookie.UpdateClickRate = function () {
-	CalcCookie.Clicks[0].clicks = Math.max(0, Game.cookieClicks - CalcCookie.CookieClicksLast);
-	CalcCookie.Clicks[0].time = new Date().getTime() - CalcCookie.Clicks[0].time;
-	var totalClicks = CalcCookie.Clicks[0].clicks;
-	var totalTime = CalcCookie.Clicks[0].time;
-	for (var i = CalcCookie.Clicks.length - 1; i >= 1; i--) {
-		//str += i + ',';
-		totalClicks += CalcCookie.Clicks[i].clicks;
-		totalTime += CalcCookie.Clicks[i].time;
-		CalcCookie.Clicks[i].clicks = CalcCookie.Clicks[i - 1].clicks;
-		CalcCookie.Clicks[i].time = CalcCookie.Clicks[i - 1].time;
-	}
-	CalcCookie.Clicks[0].time = new Date().getTime();
-	CalcCookie.ClicksPerSecond = totalClicks / totalTime * 1000;
+	var old = CalcCookie.Clicks[CalcCookie.Clicks.length - 1];
+	var cur = { clicks: Game.cookieClicks, time: new Date().getTime() };
+	CalcCookie.ClicksPerSecond = (cur.clicks - old.clicks) /
+	    (cur.time - old.time) * 1000;
 
-	CalcCookie.CookieClicksLast = Game.cookieClicks;
+	for (var i = 0; i < CalcCookie.Clicks.length - 1; i++)
+		CalcCookie.Clicks[i + 1] = CalcCookie.Clicks[i];
+	CalcCookie.Clicks[0] = cur;
 }
 
 //#endregion
@@ -1060,12 +1053,10 @@ CalcCookieAction.prototype.Disable = function (notify) {
 CALC COOKIE VARIABLES
 =======================================================================================*/
 
-var t = 500;
+var t = new Date().getTime();
 CalcCookie.Clicks = [{ clicks: 0, time: t }, { clicks: 0, time: t }, { clicks: 0, time: t }, { clicks: 0, time: t }, { clicks: 0, time: t },
 					{ clicks: 0, time: t }, { clicks: 0, time: t }, { clicks: 0, time: t }, { clicks: 0, time: t }, { clicks: 0, time: t },
 					{ clicks: 0, time: t }, { clicks: 0, time: t }, { clicks: 0, time: t }, { clicks: 0, time: t }, { clicks: 0, time: t }];
-CalcCookie.Clicks[0].time = new Date().getTime();
-CalcCookie.CookieClicksLast = Game.cookieClicks;
 
 CalcCookie.Price = new PriceCalculator();
 CalcCookie.Season = new SeasonCalculator();
@@ -1093,7 +1084,7 @@ CalcCookie.Actions = {
 	buildingbci: new CalcCookieAction('Building BCI', 'toggle', 300, CalcCookie.UpdateBuildingBCI, CalcCookie.UpdateBuildingBCI, CalcCookie.BuildingBCIOff),
 	upgradebci: new CalcCookieAction('Upgrade BCI', 'toggle', 2000, CalcCookie.UpdateUpgradeBCI, CalcCookie.RefreshUpgrades, CalcCookie.RefreshUpgrades),
 
-	clickrate: new CalcCookieAction('Update Click Rate', 'toggle', 500, CalcCookie.UpdateClickRate)
+	clickrate: new CalcCookieAction('Update Click Rate', 'toggle', 1000, CalcCookie.UpdateClickRate)
 
 };
 
