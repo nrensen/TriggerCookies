@@ -680,6 +680,67 @@ SeasonCalculator.prototype.Update = function () {
 
 //#endregion
 /*=====================================================================================
+CALC COOKIE DRAGON
+=======================================================================================*/
+//#region Dragon
+
+function DragonCalculator() {
+}
+DragonCalculator.prototype.SetAura = function(aura, slot) {
+	var toggle = Game.ToggleSpecialMenu;
+	Game.ToggleSpecialMenu = function() {}
+	Game.SetDragonAura(aura, slot);
+	Game.ConfirmPrompt();
+	Helper.TimeLog('Krumblor: Set ' + (slot == 0 ? 'first' : 'second') +
+	    ' aura to ' + Game.dragonAuras[aura].name);
+	Game.ToggleSpecialMenu = toggle;
+}
+DragonCalculator.prototype.FindBestUpgrade = function (aura1, aura2) {
+	CalcCookie.BestDragonItem = new BuyoutItem();
+
+	if (aura1 == 0 && aura2 == 0)
+		return;
+
+	if (Game.dragonAura == aura1 && Game.dragonAura2 == aura2)
+		return;
+
+	var krumblor = Game.Upgrades['A crumbly egg'];
+	
+	if (!Game.HasUnlocked(krumblor.name))
+		return;
+
+	if (!Game.Has(krumblor.name)) {
+		var info = CalcCookie.Price.CalculateUpgradeBCI(krumblor);
+		CalcCookie.BestDragonItem = new BuyoutItem(krumblor.name,
+		    'upgrade', 13, info.price, info.bci, info.income,
+		    info.time);
+		return;
+	}
+
+	// The actual training probably belongs in AutoCookie
+	while ((aura1 != 0 && Game.dragonLevel < aura1 + 4) ||
+	    (aura2 != 0 && Game.dragonLevel < Game.dragonLevels.length - 1)) {
+		var oldlevel = Game.dragonLevel;
+		var toggle = Game.ToggleSpecialMenu;
+		Game.ToggleSpecialMenu = function() {}
+		Game.UpgradeDragon();
+		Game.ToggleSpecialMenu = toggle;
+		if (oldlevel == Game.dragonLevel)
+			break;
+		Helper.TimeLog('Krumblor: ' +
+		    Game.dragonLevels[Game.dragonLevel - 1].action);
+	}
+
+	if (aura1 != 0 && Game.dragonAura != aura1 &&
+	    Game.dragonLevel >= aura1 + 4)
+		this.SetAura(aura1, 0);
+
+	if (aura2 != 0 && Game.dragonAura2 != aura2 &&
+	    Game.dragonLevel == Game.dragonLevels.length - 1)
+		this.SetAura(aura2, 1);
+}
+//#endregion
+/*=====================================================================================
 CALC COOKIE CALCULATOR
 =======================================================================================*/
 //#region Calculator
@@ -1063,6 +1124,7 @@ CalcCookie.Clicks = [{ clicks: 0, time: t }, { clicks: 0, time: t }, { clicks: 0
 
 CalcCookie.Price = new PriceCalculator();
 CalcCookie.Season = new SeasonCalculator();
+CalcCookie.Dragon = new DragonCalculator();
 
 CalcCookie.ValuedUpgrades = [];
 
@@ -1074,6 +1136,7 @@ CalcCookie.UpgradeBCIs = { bestItem: new BuyoutItem(), timeItem: new BuyoutItem(
 CalcCookie.BestOverallItem = new BuyoutItem();
 CalcCookie.BestOverallGoal = new BuyoutItem();
 CalcCookie.BestSeasonItem = new BuyoutItem();
+CalcCookie.BestDragonItem = new BuyoutItem();
 CalcCookie.BestResearchItem = new BuyoutItem();
 
 CalcCookie.MaintainLucky = false;

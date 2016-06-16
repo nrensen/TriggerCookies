@@ -201,6 +201,14 @@ AutoCookie.Load = function (data) {
 
 			if (name == 'seasoninput')
 				AutoCookie.MaintainSeason = valueStr;
+
+			if (isValid('dragonaura1', name, value))
+				AutoCookie.DragonAura1 = value;
+			if (isValid('dragonaura2', name, value))
+				AutoCookie.DragonAura2 = value;
+			if (AutoCookie.DragonAura1 == 0 ||
+			    AutoCookie.DragonAura2 == AutoCookie.DragonAura1)
+				AutoCookie.DragonAura2 = 0;
 		}
 	}
 }
@@ -245,6 +253,9 @@ AutoCookie.Save = function () {
 
 	write('glevel', AutoCookie.GrandmapocalypseLevel) +
 
+	write('dragonaura1', AutoCookie.DragonAura1) +
+	write('dragonaura2', AutoCookie.DragonAura2) +
+
 	'';
 	return str;
 }
@@ -255,6 +266,18 @@ AUTO-COOKIE MENU
 =======================================================================================*/
 //#region Menu
 
+AutoCookie.DragonAuraOptions = function(current, exclude) {
+	var str = '';
+	for (var idx in Game.dragonAuras) {
+		if (idx != 0 && idx == exclude)
+			continue;
+		str += '<option value="' + idx + '"';
+		if (current == idx)
+			str += ' selected';
+		str += '>' + Game.dragonAuras[idx].name + '</option>';
+	}
+	return str;
+}
 /* Writes the Auto-Cookie buttons. */
 AutoCookie.WriteMenu = function (tab) {
 
@@ -334,6 +357,17 @@ AutoCookie.WriteMenu = function (tab) {
 		'<option value="3"' + (AutoCookie.GrandmapocalypseLevel == 3 ? ' selected' : '') + '>Elder Pact</option>' +
 		'</select>' +
 		'</div>';
+
+		str += '<div class="listing">Dragon Aura: ';
+		for (var i = 1; i <= 2; i++) {
+			var current = AutoCookie['DragonAura' + i];
+			str += '<select id="' + iAuto('dragonAura' + i) + '" onchange="AutoCookie.CheckDragonAura(' + i + ')" style="font-size: 14px; background-color: #111; color: #FFF; border: 1px ridge #444; padding: 2px;">' +
+			    AutoCookie.DragonAuraOptions(current,
+				i == 2 ? AutoCookie.DragonAura1 : -1) +
+			    '</select> ';
+		}
+		str += '</div>';
+			
 
 		str += '<div class="listing"><b id="' + iAuto('nextType') + '">Next item : </b> <div id="' + iAuto('nextItem') + '" class="priceoff">' + Beautify(Game.heavenlyCookies) + '</div></div>';
 
@@ -580,6 +614,22 @@ AutoCookie.CheckGResearchInput = function () {
 		var level = parseInt(lAuto('gResearchInput').value);
 		if (level != AutoCookie.GrandmapocalypseLevel) {
 			AutoCookie.GrandmapocalypseLevel = level;
+		}
+	}
+}
+AutoCookie.CheckDragonAura = function (i) {
+
+	var sel = lAuto('dragonAura' + i);
+	if (sel != null) {
+		var aura = parseInt(sel.value);
+		AutoCookie['DragonAura' + i] = aura;
+		if (i == 1) {
+			if (aura == 0 || aura == AutoCookie.DragonAura2)
+				AutoCookie.DragonAura2 = 0;
+			var sel2 = lAuto('dragonAura2');
+			sel2.innerHTML = AutoCookie.DragonAuraOptions(
+			    AutoCookie.DragonAura2, aura);
+			sel2.disabled = aura == 0;
 		}
 	}
 }
@@ -929,6 +979,12 @@ AutoCookie.AutobuyLogic = function () {
 	if (buyResearch) {
 		CalcCookie.Price.FindBestResearch(AutoCookie.GrandmapocalypseLevel, maintainPledge, applyCovenant);
 		bestItem = CalcCookie.BestResearchItem;
+	}
+	if ((AutoCookie.DragonAura1 || AutoCookie.DragonAura2)
+	    && (bestItem.Type == 'invalid' || !bestItem.CanAfford())) {
+		CalcCookie.Dragon.FindBestUpgrade(
+		    AutoCookie.DragonAura1, AutoCookie.DragonAura2);
+		bestItem = CalcCookie.BestDragonItem;
 	}
 	if ((buySeasons || maintainSeason != '') && (bestItem.Type == 'invalid' || !bestItem.CanAfford())) {
 		CalcCookie.Season.FindBestUpgrade(buySeasons, maintainSeason);
@@ -1467,6 +1523,8 @@ AutoCookie.PurchaseDevil = false;
 
 AutoCookie.MaintainSeason = '';
 AutoCookie.GrandmapocalypseLevel = 3;
+AutoCookie.DragonAura1 = 0;
+AutoCookie.DragonAura2 = 0;
 
 /* The notify sound for golden cookies. Source: http://www.soundjay.com/button/beep-30b.mp3 */
 AutoCookie.NotifySound = new Audio("https://gist.github.com/pernatiy/38bc231506b06fd85473/raw/beep-30.mp3");
