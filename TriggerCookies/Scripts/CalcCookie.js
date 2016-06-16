@@ -252,13 +252,13 @@ CalcCookie.BuildingTooltipBCI = function () {
 	var desc = me.desc;
 	var name = me.name;
 	if (Game.season == 'fools') {
-		if (!Game.foolIcons[me.name]) {
-			name = Game.foolNames['Unknown'];
-			desc = Game.foolDescs['Unknown'];
+		if (!Game.foolObjects[me.name]) {
+			name = Game.foolObjects['Unknown'].name;
+			desc = Game.foolObjects['Unknown'].desc;
 		}
 		else {
-			name = Game.foolNames[me.name];
-			desc = Game.foolDescs[me.name];
+			name = Game.foolObjects[me.name].name;
+			desc = Game.foolObjects[me.name].desc;
 		}
 	}
 	if (me.locked) {
