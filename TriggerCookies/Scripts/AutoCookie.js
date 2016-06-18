@@ -116,6 +116,8 @@ AutoCookie.Enable = function (firstTime) {
 	if (firstTime) {
 		Game.customLogic.push(AutoCookie.InstantClickLogic);
 		Game.customLogic.push(AutoCookie.AutobuyLogic);
+		Game.customLogic.push(AutoCookie.GoldenClickLogic);
+		Game.customLogic.push(AutoCookie.GoldenSwitchLogic);
 	}
 	AutoCookie.Actions['checkautoclick'].Enable(false);
 	AutoCookie.Actions['checkascendinputs'].Enable(false);
@@ -164,6 +166,7 @@ AutoCookie.Load = function (data) {
 			readAction('autoupgrades', name, value);
 			readAction('autoresearch', name, value);
 			readAction('autoseason', name, value);
+			readAction('autogoldenswitch', name, value);
 
 			readAction('autoascend', name, value);
 			readAction('allowdevil', name, value);
@@ -220,6 +223,7 @@ AutoCookie.Save = function () {
 	writeAction('autoupgrades') +
 	writeAction('autoresearch') +
 	writeAction('autoseason') +
+	writeAction('autogoldenswitch') +
 
 	writeAction('autoascend') +
 	writeAction('allowdevil') +
@@ -297,6 +301,7 @@ AutoCookie.WriteMenu = function (tab) {
 				AutoCookie.WriteButton('autoupgrades') +
 				AutoCookie.WriteButton('autoresearch') +
 				AutoCookie.WriteButton('autoseason') +
+				AutoCookie.WriteButton('autogoldenswitch') +
 				'<label style="display: none">Disables the settings below until the cycle is complete</label>' +
 
 
@@ -665,6 +670,7 @@ AutoCookie.EnabledAll = function () {
 	AutoCookie.Actions['autoupgrades'].Enable(false);
 	AutoCookie.Actions['autoresearch'].Enable(false);
 	AutoCookie.Actions['autoseason'].Enable(false);
+	AutoCookie.Actions['autogoldenswitch'].Enable(false);
 
 	AutoCookie.Actions['autoascend'].Enable(false);
 	AutoCookie.Actions['allowdevil'].Enable(false);
@@ -690,6 +696,7 @@ AutoCookie.DisableAll = function () {
 	AutoCookie.Actions['autoupgrades'].Disable(false);
 	AutoCookie.Actions['autoresearch'].Disable(false);
 	AutoCookie.Actions['autoseason'].Disable(false);
+	AutoCookie.Actions['autogoldenswitch'].Disable(false);
 
 	AutoCookie.Actions['maintainpledge'].Disable(false);
 	AutoCookie.Actions['maintainelder'].Disable(false);
@@ -733,6 +740,7 @@ AutoCookie.EnabledAllBuy = function () {
 	AutoCookie.Actions['autoupgrades'].Enable(false);
 	AutoCookie.Actions['autoresearch'].Enable(false);
 	AutoCookie.Actions['autoseason'].Enable(false);
+	AutoCookie.Actions['autogoldenswitch'].Enable(false);
 
 	AutoCookie.UpdateButtons();
 	Game.UpdateMenu();
@@ -743,6 +751,7 @@ AutoCookie.DisableAllBuy = function () {
 	AutoCookie.Actions['autoupgrades'].Disable(false);
 	AutoCookie.Actions['autoresearch'].Disable(false);
 	AutoCookie.Actions['autoseason'].Disable(false);
+	AutoCookie.Actions['autogoldenswitch'].Disable(false);
 
 	AutoCookie.Actions['maintainpledge'].Disable(false);
 	AutoCookie.Actions['maintainelder'].Disable(false);
@@ -780,21 +789,50 @@ AutoCookie.ToggleInstantClick = function() {
 }
 
 /* Clicks the golden cookies. */
-AutoCookie.ClickGoldenCookies = function () {
-	// Prevent dealing with golden cookies while ascended.
-	if (!Game.AscendTimer && !Game.OnAscend) {
-		if (Game.goldenCookie.life > 0 && (Game.goldenCookie.wrath == 0 || AutoCookie.Actions['wrath'].Enabled)) {
-			var click = Game.Click;
-			Game.goldenCookie.click();
-			Game.Click = click;
-			if (AutoCookie.Actions['gnotify'].Enabled)
-				AutoCookie.NotifySound.play();
+AutoCookie.GoldenClickLogic = function () {
+	if (Game.AscendTimer || Game.OnAscend)
+		return;
+
+	if (Game.goldenCookie.life == 0 ||
+	    !AutoCookie.Actions['gold'].Enabled ||
+	    (Game.goldenCookie.wrath && !AutoCookie.Actions['wrath'].Enabled))
+		return;
+
+	var click = Game.Click;
+	Game.goldenCookie.click();
+	Game.Click = click;
+}
+// probably should move this to calc cookie.
+AutoCookie.GoldenSwitchLogic = function() {
+	if (Game.AscendTimer || Game.OnAscend)
+		return;
+
+	if (!Game.Has('Golden switch') ||
+	    !AutoCookie.Actions['autogoldenswitch'].Enabled)
+		return;
+
+	var gson = Game.Has('Golden switch [off]');
+
+	// defer switching off until outside a frenzy
+	if (Game.frenzy == 0 && Game.clickFrenzy == 0 && gson) {
+		var gsoff = Game.Upgrades['Golden switch [on]'];
+		if (gsoff.getPrice() < Game.cookies) {
+			gsoff.buy();
+			Helper.TimeLog('Golden switch off');
 		}
 	}
-}
-/* Auto-clicks the big cookie. */
-AutoCookie.ToggleWrath = function () {
 
+	if (Game.clickFrenzy > 0 && !gson) {
+		var cost = Game.cookiesPs * 3600 * 2; // on and off
+		if (Game.frenzy > 0) // switch off outside frenzy
+			cost *= (1 + 1/Game.frenzyPower) / 2;
+		var gain = Game.computedMouseCps * CalcCookie.ClicksPerSecond
+		    * Game.clickFrenzy / Game.fps * 0.5;
+		if (gain > cost) {
+			Game.Upgrades['Golden switch [off]'].buy();
+			Helper.TimeLog('Golden switch on');
+		}
+	}
 }
 /* Alerts when golden cookies appear. */
 AutoCookie.GoldenCookieAlert = function () {
@@ -1375,7 +1413,7 @@ AutoCookie.Actions = {
 	slow: new AutoCookieAction('Slow Click', null, [11, 0], 'toggle', false, 300, AutoCookie.AutoClick, true),
 	rapid: new AutoCookieAction('Rapid Click', null, [12, 0], 'toggle', false, 5, AutoCookie.AutoClick, true),
 
-	gold: new AutoCookieAction('Click Golden Cookies', 'Golden Click', [11, 14], 'toggle', false, 1000, AutoCookie.ClickGoldenCookies, true),
+	gold: new AutoCookieAction('Click Golden Cookies', 'Golden Click', [11, 14], 'toggle', false, 0, function() {}, true),
 	wrath: new AutoCookieAction('Allow Wrath Cookies', 'Allow Wrath', [15, 5], 'toggle', false, 0, function () {}, true),
 	gnotify: new AutoCookieAction('Golden Cookie Alert', 'Golden Alert', [8, 0], 'toggle', false, 1000, AutoCookie.GoldenCookieAlert, true),
 
@@ -1386,6 +1424,7 @@ AutoCookie.Actions = {
 	autoupgrades: new AutoCookieAction('Autobuy Upgrades', null, [9, 0], 'toggle', false, 0, function () {}, true),
 	autoresearch: new AutoCookieAction('Autobuy Research', null, [11, 9], 'toggle', false, 0, function () {}, true),
 	autoseason: new AutoCookieAction('Season Cycle', null, [16, 6], 'toggle', false, 0, function () { }, true),
+	autogoldenswitch: new AutoCookieAction('Auto Golden Switch', null, [11, 14], 'toggle', false, 0, function() {}, true),
 
 	maintainpledge: new AutoCookieAction('Maintain Pledge', null, [9, 9], 'toggle', false, 0, function () { }, true),
 	maintainelder: new AutoCookieAction('Apply Elder Covenant', null, [8, 9], 'toggle', false, 0, function () { }, true),
