@@ -613,7 +613,6 @@ SeasonCalculator.prototype.Update = function () {
 
 	if (Game.season == 'christmas') {
 		if (this.ChristmasComplete) {
-
 			if (!this.ValentinesComplete)
 				this.NewSeason = 'valentines';
 			else if (!this.EasterComplete)
@@ -621,6 +620,10 @@ SeasonCalculator.prototype.Update = function () {
 			else if (!this.HalloweenComplete)
 				this.NewSeason = 'halloween';
 		}
+		else if (!this.ValentinesComplete &&
+		    Game.santaLevel == Game.santaLevels.length - 1 &&
+		    this.SantaDrops == this.Lists.SantaDrops.length)
+			this.NewSeason = 'valentines';
 	}
 	else if (Game.season == 'valentines') {
 		if (this.ValentinesComplete) {
