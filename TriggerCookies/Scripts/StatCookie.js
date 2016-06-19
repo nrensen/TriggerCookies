@@ -568,11 +568,11 @@ STAT COOKIE PRESTIGE
 
 function StatPrestige() {
 
-	this.AscendNowToGet = 0;
-
-	this.CookiesToNextXChips = 0;
+	this.ChipsOnAscend = 0;
+	this.TotalChipsEarned = 0;
 
 	this.XAmount = 1;
+	this.CookiesToNextXChips = 0;
 
 	this.CookiesPerChip = 0;
 
@@ -589,22 +589,21 @@ StatPrestige.prototype.WriteStats = function () {
 	str += Helper.Menu.WriteSectionHeader('Prestige', [19, 7]);
 
 	str +=
-	'<div class="listing"><b>Heavenly Cookies in bank : </b> <div id="' + iStat('hcookiesBank') + '" class="priceoff">' + Beautify(Game.heavenlyCookies) + '</div></div>' +
-	'<div class="listing"><b>Heavenly Chips in bank : </b> <div id="' + iStat('hchipsBank') + '" class="price plain heavenly">' + Beautify(Game.heavenlyChips) + '</div></div>' +
-	'<div class="listing"><b>Heavenly Chips earned : </b> <div id="' + iStat('hchipsEarned') + '" class="price plain heavenly">' + Beautify(Game.heavenlyChipsEarned) + '</div></div>' +
-	'<div class="listing"><b>Chips earned from ascend : </b> <div id="' + iStat('hchipsAscend') + '" class="price plain heavenly">' + Beautify(this.AscendNowToGet) + '</div></div>' +
+	'<div class="listing"><b>Heavenly Chips in bank : </b> <div id="' + iStat('hchipsBank') + '" class="price plain heavenly"></div></div>' +
+	'<div class="listing"><b>Chips available on ascend : </b> <div id="' + iStat('hchipsAscend') + '" class="price plain heavenly"></div></div>' +
+	'<div class="listing"><b>Heavenly Chips earned : </b> <div id="' + iStat('hchipsEarned') + '" class="price plain heavenly"></div></div>' +
 
 	Helper.Menu.WriteSectionMiddle() +
 
-	'<div class="listing"><b>Current chips per second : </b> <div id="' + iStat('currentHCPS') + '" class="price plain heavenly">' + Beautify(this.ChipsPerSecond) + '</div></div>' +
-	'<div class="listing"><b>Base chips per second : </b> <div id="' + iStat('baseHCPS') + '" class="price plain heavenly">' + Beautify(this.BaseChipsPerSecond) + '</div></div>' +
-	'<div class="listing"><b>Click chips per second : </b> <div id="' + iStat('clickHCPS') + '" class="price plain heavenly">' + Beautify(this.ClickChipsPerSecond) + '</div></div>' +
-	'<div class="listing"><b>Total chips per second : </b> <div id="' + iStat('totalHCPS') + '" class="price plain heavenly">' + Beautify(this.TotalChipsPerSecond) + '</div></div>' +
+	'<div class="listing"><b>Current chips per second : </b> <div id="' + iStat('currentHCPS') + '" class="price plain heavenly"></div></div>' +
+	'<div class="listing"><b>Base chips per second : </b> <div id="' + iStat('baseHCPS') + '" class="price plain heavenly"></div></div>' +
+	'<div class="listing"><b>Click chips per second : </b> <div id="' + iStat('clickHCPS') + '" class="price plain heavenly"></div></div>' +
+	'<div class="listing"><b>Total chips per second : </b> <div id="' + iStat('totalHCPS') + '" class="price plain heavenly"></div></div>' +
 
 	Helper.Menu.WriteSectionMiddle() +
 
-	'<div class="listing"><b id="' + iStat('hchipNextXAmount') + '">Cookies to next ' + Beautify(this.XAmount) + ' chip' + (this.XAmount != 1 ? 's' : '') + ' : </b> <div id="' + iStat('hchipNextCookies') + '" class="price plain">' + Beautify(this.CookiesToNextXChips) + '</div></div>' +
-	'<div class="listing"><b>Cookies per chip : </b> <div id="' + iStat('cookiesPerHChip') + '" class="price plain">' + Beautify(this.CookiesPerChip) + '</div></div>' +
+	'<div class="listing"><b id="' + iStat('hchipNextXAmount') + '"></b> <div id="' + iStat('hchipNextCookies') + '" class="price plain"></div></div>' +
+	'<div class="listing"><b>Cookies per chip : </b> <div id="' + iStat('cookiesPerHChip') + '" class="price plain"></div></div>' +
 
 	'';
 
@@ -615,35 +614,40 @@ StatPrestige.prototype.WriteStats = function () {
 StatPrestige.prototype.UpdateStats = function () {
 	this.Update();
 
-	lStat('hcookiesBank').innerHTML = Beautify(Game.heavenlyCookies);
 	lStat('hchipsBank').innerHTML = Beautify(Game.heavenlyChips);
-	lStat('hchipsEarned').innerHTML = Beautify(Game.heavenlyChipsEarned);
-	lStat('hchipsAscend').innerHTML = Beautify(this.AscendNowToGet);
+	lStat('hchipsAscend').innerHTML = Beautify(this.ChipsOnAscend);
+	lStat('hchipsEarned').innerHTML = Beautify(this.TotalChipsEarned);
 
-	lStat('currentHCPS').innerHTML = Beautify(this.ChipsPerSecond);
-	lStat('baseHCPS').innerHTML = Beautify(this.BaseChipsPerSecond);
-	lStat('clickHCPS').innerHTML = Beautify(this.ClickChipsPerSecond);
-	lStat('totalHCPS').innerHTML = Beautify(this.TotalChipsPerSecond);
+	lStat('currentHCPS').innerHTML = Beautify(this.ChipsPerSecond, 2);
+	lStat('baseHCPS').innerHTML = Beautify(this.BaseChipsPerSecond, 2);
+	lStat('clickHCPS').innerHTML = Beautify(this.ClickChipsPerSecond, 2);
+	lStat('totalHCPS').innerHTML = Beautify(this.TotalChipsPerSecond, 2);
 
-	lStat('hchipNextXAmount').innerHTML = 'Cookies to next ' + Beautify(this.XAmount) + ' chip' + (this.XAmount != 1 ? 's' : '') + ' : ';
+	lStat('hchipNextXAmount').innerHTML = 'Cookies to next multiple of ' +
+	    Beautify(this.XAmount) + ' chip' + (this.XAmount != 1 ? 's' : '') +
+	     ' : ';
 	lStat('hchipNextCookies').innerHTML = Beautify(this.CookiesToNextXChips);
 	lStat('cookiesPerHChip').innerHTML = Beautify(this.CookiesPerChip);
-
 }
 StatPrestige.prototype.Update = function () {
 
-	this.AscendNowToGet = Math.floor(Game.HowMuchPrestige(Game.cookiesReset + Game.cookiesEarned) - Game.HowMuchPrestige(Game.cookiesReset));
+	var totalCookies = Game.cookiesReset + Game.cookiesEarned;
 
-	var totalChips = Game.heavenlyChipsEarned + this.AscendNowToGet;
-	var chipXDigits = Math.max(0, Math.floor(Math.log(this.AscendNowToGet) / Math.log(10)) - 3);
+	this.ChipsOnAscend = Game.heavenlyChips +
+	    Math.floor(Game.HowMuchPrestige(totalCookies)
+	    - Game.HowMuchPrestige(Game.cookiesReset));
 
-	this.CookiesPerChip = Game.HowManyCookiesReset(totalChips + 1) - Game.HowManyCookiesReset(totalChips);
+	this.TotalChipsEarned = Game.HowMuchPrestige(totalCookies);
+	this.CookiesPerChip = Game.HowManyCookiesReset(this.TotalChipsEarned + 1) - Game.HowManyCookiesReset(this.TotalChipsEarned);
 
-	this.XAmount = Math.pow(10, chipXDigits);
+	this.XAmount = Math.pow(10,
+	    Math.max(0, Math.floor(Math.log10(this.ChipsOnAscend)) - 3));
 
+	var chipsNext = this.TotalChipsEarned + this.XAmount
+	    - this.ChipsOnAscend % this.XAmount;
 
-	var chipsNext = Game.heavenlyChipsEarned + (this.AscendNowToGet + this.XAmount) - (this.AscendNowToGet + this.XAmount) % this.XAmount;
-	this.CookiesToNextXChips = Game.HowManyCookiesReset(chipsNext) - (Game.cookiesReset + Game.cookiesEarned);
+	this.CookiesToNextXChips = Game.HowManyCookiesReset(chipsNext) -
+	    totalCookies;
 
 	this.ChipsPerSecond = CalcCookie.Price.EstimatedCPS()
 	    / this.CookiesPerChip;
