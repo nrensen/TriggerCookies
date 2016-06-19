@@ -750,22 +750,14 @@ STAT COOKIE SEASONS
 //#region Seasons
 
 function StatSeasons() {
-	this.SantaLevel = 0;
-	this.SantaDrops = 0;
-	this.ChristmasCookies = 0;
 	this.SpookyCookies = 0
-	this.HeartCookies = 0;
 	this.EasterEggs = 0;
 	this.RareEggs = 0;
 	this.Reindeer = {};
 	this.Resets = 0;
 
 	this.Lists = {};
-	this.Lists.SantaLevels = ['Festive test tube', 'Festive ornament', 'Festive wreath', 'Festive tree', 'Festive present', 'Festive elf fetus', 'Elf toddler', 'Elfling', 'Young elf', 'Bulky elf', 'Nick', 'Santa Claus', 'Elder Santa', 'True Santa', 'Final Claus'];
-	this.Lists.SantaDrops = ['A festive hat', 'An itchy sweater', 'Increased merriness', 'Improved jolliness', 'A lump of coal', 'An itchy sweater', 'Reindeer baking grounds', 'Weighted sleighs', 'Ho ho ho-flavored frosting', 'Season savings', 'Toy workshop', 'Naughty list', 'Santa\'s bottomless bag', 'Santa\'s helpers', 'Santa\'s legacy', 'Santa\'s milk and cookies'];
-	this.Lists.ChristmasCookies = ['Christmas tree biscuits', 'Snowflake biscuits', 'Snowman biscuits', 'Holly biscuits', 'Candy cane biscuits', 'Bell biscuits', 'Present biscuits'];
 	this.Lists.SpookyCookies = ['Skull cookies', 'Ghost cookies', 'Bat cookies', 'Slime cookies', 'Pumpkin cookies', 'Eyeball cookies', 'Spider cookies'];
-	this.Lists.HeartCookies = ['Pure heart biscuits', 'Ardent heart biscuits', 'Sour heart biscuits', 'Weeping heart biscuits', 'Golden heart biscuits', 'Eternal heart biscuits'];
 	this.Lists.EasterEggs = ['Chicken egg', 'Duck egg', 'Turkey egg', 'Quail egg', 'Robin egg', 'Ostrich egg', 'Cassowary egg', 'Salmon roe', 'Frogspawn', 'Shark egg', 'Turtle egg', 'Ant larva', 'Golden goose egg', 'Faberge egg', 'Wrinklerspawn', 'Cookie egg', 'Omelette', 'Chocolate egg', 'Century egg', '"egg"'];
 	this.Lists.RareEggs = ['Golden goose egg', 'Faberge egg', 'Wrinklerspawn', 'Cookie egg', 'Omelette', 'Chocolate egg', 'Century egg', '"egg"'];
 }
@@ -776,30 +768,21 @@ StatSeasons.prototype.WriteStats = function () {
 
 	str += Helper.Menu.WriteSectionHeader('Seasons', [16, 6]);
 
-	var seasonNames = {
-		'': 'None',
-		christmas: 'Christmas',
-		halloween: 'Halloween',
-		valentines: 'Valentines Day',
-		easter: 'Easter',
-		fools: 'Business Day'
-	};
-
 	str +=
-	'<div class="listing"><b>Current season : </b> <div id="' + iStat('currentSeason') + '" class="priceoff">' + seasonNames[Game.season] + (Game.seasonT > 0 && Game.season != '' ? ' (time remaining: ' + Helper.Numbers.GetTime(Game.seasonT / Game.fps * 1000, 3) + ')' : '') + '</div></div>' +
+	'<div class="listing"><b>Current season : </b> <div id="' + iStat('currentSeason') + '" class="priceoff"></div></div>' +
 
 	'<div id="' + iStat('reindeerFound') + '" class="priceoff"></div>' +
 
 	// Christmas
-	'<div class="listing"><b>Santa level : </b> <div id="' + iStat('santaLevel') + '" class="priceoff">' + Beautify(this.SantaLevel) + '/' + Beautify(15) + (this.SantaLevel > 0 ? ' ' + this.Lists.SantaLevels[this.SantaLevel - 1] : '') + '</div></div>' +
-	'<div class="listing"><b>Santa drops : </b> <div id="' + iStat('santaDrops') + '" class="priceoff">' + Beautify(this.SantaDrops) + '/' + Beautify(this.Lists.SantaDrops.length) + '</div></div>' +
-	'<div class="listing"><b>Christmas cookies : </b> <div id="' + iStat('xmasCookies') + '" class="priceoff">' + Beautify(this.ChristmasCookies) + '/' + Beautify(this.Lists.ChristmasCookies.length) + '</div></div>' +
+	'<div class="listing"><b>Santa level : </b> <div id="' + iStat('santaLevel') + '" class="priceoff"></div></div>' +
+	'<div class="listing"><b>Santa drops : </b> <div id="' + iStat('santaDrops') + '" class="priceoff"></div></div>' +
+	'<div class="listing"><b>Christmas cookies : </b> <div id="' + iStat('xmasCookies') + '" class="priceoff"></div></div>' +
 
 	// Halloween
 	'<div class="listing"><b>Spooky cookies : </b> <div id="' + iStat('spookyCookies') + '" class="priceoff">' + Beautify(this.SpookyCookies) + '/' + Beautify(this.Lists.SpookyCookies.length) + '</div></div>' +
 
 	// Valentines Day
-	'<div class="listing"><b>Heart cookies : </b> <div id="' + iStat('heartCookies') + '" class="priceoff">' + Beautify(this.HeartCookies) + '/' + Beautify(this.Lists.HeartCookies.length) + '</div></div>' +
+	'<div class="listing"><b>Heart cookies : </b> <div id="' + iStat('heartCookies') + '" class="priceoff"></div></div>' +
 
 	// Easter
 	'<div class="listing"><b>Easter eggs : </b> <div id="' + iStat('easterEggs') + '" class="priceoff">' + Beautify(this.EasterEggs) + '/' + Beautify(this.Lists.EasterEggs.length) + ' <small>' +
@@ -814,16 +797,14 @@ StatSeasons.prototype.WriteStats = function () {
 StatSeasons.prototype.UpdateStats = function () {
 	this.Update();
 
-	var seasonNames = {
-		'': 'None',
-		christmas: 'Christmas',
-		halloween: 'Halloween',
-		valentines: 'Valentines Day',
-		easter: 'Easter',
-		fools: 'Business Day'
-	};
-
-	lStat('currentSeason').innerHTML = seasonNames[Game.season] + (Game.seasonT > 0 && Game.season != '' ? ' (time remaining: ' + Helper.Numbers.GetTime(Game.seasonT / Game.fps * 1000, 3) + ')' : '');
+	if (Game.season) 
+		lStat('currentSeason').innerHTML =
+		    Game.seasons[Game.season].name +
+		    ' (time remaining: ' +
+		    Helper.Numbers.GetTime(Game.seasonT / Game.fps * 1000, 3) +
+		     ')';
+	else
+		lStat('currentSeason').innerHTML = 'None';
 
 	var reindeer = {}
 	Object.keys(this.Reindeer).forEach(key =>
@@ -840,40 +821,34 @@ StatSeasons.prototype.UpdateStats = function () {
 	}, '');
 
 	if (str != '')
-		str = Helper.Menu.WriteSectionMiddle() + str + Helper.Menu.WriteSectionMiddle();
+		str = Helper.Menu.WriteSectionMiddle() + str +
+		    Helper.Menu.WriteSectionMiddle();
 	lStat('reindeerFound').innerHTML = str;
 
-	lStat('santaLevel').innerHTML = Beautify(this.SantaLevel) + '/' + Beautify(15) + (this.SantaLevel > 0 ? ' ' + this.Lists.SantaLevels[this.SantaLevel - 1] : '');
-	lStat('santaDrops').innerHTML = Beautify(this.SantaDrops) + '/' + Beautify(this.Lists.SantaDrops.length);
-	lStat('xmasCookies').innerHTML = Beautify(this.ChristmasCookies) + '/' + Beautify(this.Lists.ChristmasCookies.length);
+	var santaLevel = Game.Has('A festive hat') ? Game.santaLevel + 1 : 0;
+	lStat('santaLevel').innerHTML = santaLevel +
+	    '/' + Game.santaLevels.length +
+	    (santaLevel > 0 ? ' ' + Game.santaLevels[Game.santaLevel] : '');
+	lStat('santaDrops').innerHTML = CalcCookie.Season.SantaDrops +
+	    '/' + Game.santaDrops.length;
+	lStat('xmasCookies').innerHTML = CalcCookie.Season.ChristmasCookies +
+	    '/' + CalcCookie.Season.Lists.ChristmasCookies.length;
 
 	lStat('spookyCookies').innerHTML = Beautify(this.SpookyCookies) + '/' + Beautify(this.Lists.SpookyCookies.length);
 
-	lStat('heartCookies').innerHTML = Beautify(this.HeartCookies) + '/' + Beautify(this.Lists.HeartCookies.length);
+	var totalHeart = 0;
+	for (i in Game.UnlockAt)
+		if (Game.UnlockAt[i].season == 'valentines')
+			totalHeart++;
+
+	lStat('heartCookies').innerHTML = CalcCookie.Season.HeartCookies + '/' +
+	    totalHeart;
 
 	lStat('easterEggs').innerHTML = Beautify(this.EasterEggs) + '/' + Beautify(this.Lists.EasterEggs.length) + ' <small>' +
 		'(rare eggs : ' + Beautify(this.RareEggs) + '/' + Beautify(this.Lists.RareEggs.length) + ')' + '</small>';
 
 }
 StatSeasons.prototype.Update = function () {
-
-	//======== CHRISTMAS ========
-
-	// Check Santa level
-	this.SantaLevel = (Game.Has('A festive hat') ? Game.santaLevel + 1 : 0);
-
-	// Check Santa drops
-	this.SantaDrops = 0;
-	for (var i = 0; i < this.Lists.SantaDrops.length; i++) {
-		var name = this.Lists.SantaDrops[i];
-		if (Game.Has(name)) this.SantaDrops++;
-	}
-	// Check Christmas cookies
-	this.ChristmasCookies = 0;
-	for (var i = 0; i < this.Lists.ChristmasCookies.length; i++) {
-		var name = this.Lists.ChristmasCookies[i];
-		if (Game.Has(name)) this.ChristmasCookies++;
-	}
 
 	//======== HALLOWEEN ========
 
@@ -882,15 +857,6 @@ StatSeasons.prototype.Update = function () {
 	for (var i = 0; i < this.Lists.SpookyCookies.length; i++) {
 		var name = this.Lists.SpookyCookies[i];
 		if (Game.Has(name)) this.SpookyCookies++;
-	}
-
-	//======== VALENTINES DAY ========
-
-	// Check heart cookies
-	this.HeartCookies = 0;
-	for (var i = 0; i < this.Lists.HeartCookies.length; i++) {
-		var name = this.Lists.HeartCookies[i];
-		if (Game.Has(name)) this.HeartCookies++;
 	}
 
 	//======== EASTER ========

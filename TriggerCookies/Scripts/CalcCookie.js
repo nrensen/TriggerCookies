@@ -401,7 +401,6 @@ function SeasonCalculator() {
 	this.EasterComplete = false;
 	this.HalloweenComplete = false;
 
-	this.SantaLevel = 0;
 	this.SantaDrops = 0;
 	this.ChristmasCookies = 0;
 	this.SpookyCookies = 0
@@ -410,11 +409,8 @@ function SeasonCalculator() {
 	this.RareEggs = 0;
 
 	this.Lists = {};
-	this.Lists.SantaLevels = ['Festive test tube', 'Festive ornament', 'Festive wreath', 'Festive tree', 'Festive present', 'Festive elf fetus', 'Elf toddler', 'Elfling', 'Young elf', 'Bulky elf', 'Nick', 'Santa Claus', 'Elder Santa', 'True Santa', 'Final Claus'];
-	this.Lists.SantaDrops = ['A festive hat', 'An itchy sweater', 'Increased merriness', 'Improved jolliness', 'A lump of coal', 'An itchy sweater', 'Reindeer baking grounds', 'Weighted sleighs', 'Ho ho ho-flavored frosting', 'Season savings', 'Toy workshop', 'Naughty list', 'Santa\'s bottomless bag', 'Santa\'s helpers', 'Santa\'s legacy', 'Santa\'s milk and cookies'];
 	this.Lists.ChristmasCookies = ['Christmas tree biscuits', 'Snowflake biscuits', 'Snowman biscuits', 'Holly biscuits', 'Candy cane biscuits', 'Bell biscuits', 'Present biscuits'];
 	this.Lists.SpookyCookies = ['Skull cookies', 'Ghost cookies', 'Bat cookies', 'Slime cookies', 'Pumpkin cookies', 'Eyeball cookies', 'Spider cookies'];
-	this.Lists.HeartCookies = ['Pure heart biscuits', 'Ardent heart biscuits', 'Sour heart biscuits', 'Weeping heart biscuits', 'Golden heart biscuits', 'Eternal heart biscuits'];
 	this.Lists.EasterEggs = ['Chicken egg', 'Duck egg', 'Turkey egg', 'Quail egg', 'Robin egg', 'Ostrich egg', 'Cassowary egg', 'Salmon roe', 'Frogspawn', 'Shark egg', 'Turtle egg', 'Ant larva', 'Golden goose egg', 'Faberge egg', 'Wrinklerspawn', 'Cookie egg', 'Omelette', 'Chocolate egg', 'Century egg', '"egg"'];
 	this.Lists.RareEggs = ['Golden goose egg', 'Faberge egg', 'Wrinklerspawn', 'Cookie egg', 'Omelette', 'Chocolate egg', 'Century egg', '"egg"'];
 }
@@ -422,13 +418,8 @@ SeasonCalculator.prototype.FindBestUpgrade = function (autoSeason, maintainSeaso
 
 	this.BestItem = new BuyoutItem();
 
-	if (autoSeason) {
+	if (autoSeason && !this.CycleComplete) {
 		this.Update();
-
-		// Upgrade the jolly old man so he can deliver to more and more little kiddies
-		if (Game.santaLevel < 14) {
-			this.UpgradeSanta();
-		}
 
 		if (this.NewSeason != '') {
 			if (Game.Has('Season switcher')) {
@@ -438,42 +429,82 @@ SeasonCalculator.prototype.FindBestUpgrade = function (autoSeason, maintainSeaso
 			}
 			this.NewSeason = '';
 		}
-	}
 
-	if (!this.CycleComplete && autoSeason) {
 		if (!this.ChristmasComplete && this.BestItem.Priority < 12) {
-			// Buy Santa drops
-			for (var i = 0; i < this.Lists.SantaDrops.length; i++) {
-				var name = this.Lists.SantaDrops[i];
+			var hat = Game.Upgrades['A festive hat'];
 
-				if (Game.HasUnlocked(name) && !Game.Has(name) && (Game.Upgrades[name].getPrice() < this.BestItem.Price || this.BestItem.Type == 'invalid')) {
-					var info = CalcCookie.Price.CalculateUpgradeBCI(Game.Upgrades[name]);
-					this.BestItem = new BuyoutItem(name, 'upgrade', 11, info.price, info.bci, info.income, info.time);
+			if (Game.HasUnlocked(hat.name) &&
+			    !Game.Has(hat.name) &&
+			    (hat.getPrice() < this.BestItem.Price ||
+			    this.BestItem.Type == 'invalid')) {
+				var info = CalcCookie.Price.CalculateUpgradeBCI(hat);
+				this.BestItem = new BuyoutItem(hat.name,
+				    'upgrade', 11, info.price, info.bci,
+				    info.income, info.time);
+			}
+
+			// Upgrade the jolly old man so he can deliver to
+			// more and more little kiddies
+			if (Game.Has(hat.name) &&
+			    Game.santaLevel < Game.santaLevels.length - 1) {
+				var toggle = Game.ToggleSpecialMenu;
+				Game.ToggleSpecialMenu = function() {};
+				Game.UpgradeSanta();
+				Game.ToggleSpecialMenu = toggle;
+			}
+
+			// Buy Santa drops
+			for (var i in Game.santaDrops) {
+				var drop = Game.Upgrades[Game.santaDrops[i]];
+				if (Game.HasUnlocked(drop.name) &&
+				    !Game.Has(drop.name) &&
+				    (drop.getPrice() < this.BestItem.Price ||
+				    this.BestItem.Type == 'invalid')) {
+					var info = CalcCookie.Price.CalculateUpgradeBCI(drop);
+					this.BestItem = new BuyoutItem(
+					    drop.name, 'upgrade', 11,
+					    info.price, info.bci, info.income,
+					    info.time);
 				}
 			}
-			// Buy xmas cookies
-			for (var i = 0; i < this.Lists.ChristmasCookies.length; i++) {
-				var name = this.Lists.ChristmasCookies[i];
 
-				if (Game.HasUnlocked(name) && !Game.Has(name) && (Game.Upgrades[name].getPrice() < this.BestItem.Price || this.BestItem.Type == 'invalid')) {
-					var info = CalcCookie.Price.CalculateUpgradeBCI(Game.Upgrades[name]);
-					this.BestItem = new BuyoutItem(name, 'upgrade', 11, info.price, info.bci, info.income, info.time);
+			// Buy xmas cookies
+			for (var i in this.Lists.ChristmasCookies) {
+				var name = this.Lists.ChristmasCookies[i];
+				var cookie = Game.Upgrades[name];
+
+				if (Game.HasUnlocked(cookie.name) &&
+				    !Game.Has(cookie.name) &&
+				    (cookie.getPrice() < this.BestItem.Price ||					    this.BestItem.Type == 'invalid')) {
+					var info = CalcCookie.Price.CalculateUpgradeBCI(cookie);
+					this.BestItem = new BuyoutItem(
+					    cookie.name, 'upgrade', 11,
+					    info.price, info.bci, info.income,
+					    info.time);
 				}
 			}
 		}
 		if (!this.ValentinesComplete && this.BestItem.Priority < 12) {
-			for (var i = 0; i < this.HeartCookies.length; i++) {
-				var name = this.HeartCookies[i];
-
-				if (Game.HasUnlocked(name) && !Game.Has(name) && (Game.Upgrades[name].getPrice() < this.BestItem.Price || this.BestItem.Type == 'invalid')) {
-					var info = CalcCookie.Price.CalculateUpgradeBCI(Game.Upgrades[name]);
-					this.BestItem = new BuyoutItem(name, 'upgrade', 11, info.price, info.bci, info.income, info.time);
+			for (var i in Game.UnlockAt) {
+				var at = Game.UnlockAt[i];
+				if (at.season != 'valentines')
+					continue;
+				var upgrade = Game.Upgrades[at.name];
+				if (Game.HasUnlocked(upgrade.name) &&
+				    !Game.Has(upgrade.name) &&
+				    (upgrade.getPrice() < this.BestItem.Price ||
+				    this.BestItem.Type == 'invalid')) {
+					var info = CalcCookie.Price.CalculateUpgradeBCI(upgrade);
+					this.BestItem = new BuyoutItem(
+					    upgrade.name, 'upgrade', 11,
+					    info.price, info.bci, info.income,
+					    info.time);
 				}
 			}
 		}
 		if (!this.EasterComplete && this.BestItem.Priority < 12) {
-			for (var i = 0; i < this.EasterEggs.length; i++) {
-				var name = this.EasterEggs[i];
+			for (var i = 0; i < this.Lists.EasterEggs.length; i++) {
+				var name = this.Lists.EasterEggs[i];
 
 				if (name != 'Chocolate egg' && Game.HasUnlocked(name) && !Game.Has(name) && (Game.Upgrades[name].getPrice() < this.BestItem.Price || this.BestItem.Type == 'invalid')) {
 					var info = CalcCookie.Price.CalculateUpgradeBCI(Game.Upgrades[name]);
@@ -482,8 +513,8 @@ SeasonCalculator.prototype.FindBestUpgrade = function (autoSeason, maintainSeaso
 			}
 		}
 		if (!this.HalloweenComplete && this.BestItem.Priority < 12) {
-			for (var i = 0; i < this.SpookyCookies.length; i++) {
-				var name = this.SpookyCookies[i];
+			for (var i = 0; i < this.Lists.SpookyCookies.length; i++) {
+				var name = this.Lists.SpookyCookies[i];
 
 				if (Game.HasUnlocked(name) && !Game.Has(name) && (Game.Upgrades[name].getPrice() < this.BestItem.Price || this.BestItem.Type == 'invalid')) {
 					var info = CalcCookie.Price.CalculateUpgradeBCI(Game.Upgrades[name]);
@@ -492,83 +523,38 @@ SeasonCalculator.prototype.FindBestUpgrade = function (autoSeason, maintainSeaso
 			}
 		}
 	}
-	else {
-		if (maintainSeason != '' && Game.season != maintainSeason) {
-			this.NewSeason = maintainSeason;
-			if (Game.Has('Season switcher')) {
-				var name = this.SeasonTriggers[this.NewSeason];
-				var info = CalcCookie.Price.CalculateUpgradeBCI(Game.Upgrades[name]);
-				this.BestItem = new BuyoutItem(name, 'upgrade', 13, info.price, info.bci, info.income, info.time);
-			}
-			this.NewSeason = '';
+	else if (maintainSeason != '' && Game.season != maintainSeason) {
+		if (Game.Has('Season switcher')) {
+			var name = this.SeasonTriggers[maintainSeason];
+			var info = CalcCookie.Price.CalculateUpgradeBCI(Game.Upgrades[name]);
+			this.BestItem = new BuyoutItem(name, 'upgrade', 13, info.price, info.bci, info.income, info.time);
 		}
 	}
 
 	CalcCookie.BestSeasonItem = this.BestItem;
-}
-SeasonCalculator.prototype.UpgradeSanta = function () {
-	if (Game.Has('A festive hat')) {
-
-		// This is the in game code for upgrading santa.
-		var moni = Math.pow(Game.santaLevel + 1, Game.santaLevel + 1);
-		if (AvailableCookies() > moni && Game.santaLevel < 14) {
-			Game.Spend(moni);
-			Game.santaLevel = (Game.santaLevel + 1) % 15;
-			if (Game.santaLevel == 14) {
-				Game.Unlock('Santa\'s dominion');
-				if (Game.prefs.popups)
-					Game.Popup('You are granted<br>Santa\'s dominion.');
-				else
-					Game.Notify('You are granted Santa\'s dominion.', '', Game.Upgrades['Santa\'s dominion'].icon);
-			}
-			Game.santaTransition = 1;
-			var drops = [];
-			for (var i in Game.santaDrops) {
-				if (!Game.HasUnlocked(Game.santaDrops[i]))
-					drops.push(Game.santaDrops[i]);
-			}
-			var drop = choose(drops);
-			if (drop) {
-				Game.Unlock(drop);
-				if (Game.prefs.popups)
-					Game.Popup('You find a present which contains...<br>' + drop + '!');
-				else
-					Game.Notify('Found a present!', 'You find a present which contains...<br><b>' + drop + '</b>!', Game.Upgrades[drop].icon);
-			}
-
-			if (Game.santaLevel >= 6)
-				Game.Win('Coming to town');
-			if (Game.santaLevel >= 14)
-				Game.Win('All hail Santa');
-		}
-		if (Game.santaTransition > 0) {
-			Game.santaTransition++;
-			if (Game.santaTransition >= Game.fps / 2) Game.santaTransition = 0;
-		}
-	}
 }
 SeasonCalculator.prototype.Update = function () {
 
 	//======== CHRISTMAS ========
 
 	// Check Santa level
-	this.SantaLevel = (Game.Has('A festive hat') ? Game.santaLevel + 1 : 0);
+	this.ChristmasComplete = Game.santaLevel == Game.santaLevels.length - 1;
 
 	// Check Santa drops
-	this.ChristmasComplete = true;
 	this.SantaDrops = 0;
-	for (var i = 0; i < this.Lists.SantaDrops.length; i++) {
-		var name = this.Lists.SantaDrops[i];
-		if (Game.Has(name)) this.SantaDrops++;
-		else this.ChristmasComplete = false;
-	}
+	for (var i in Game.santaDrops)
+		if (Game.Has(Game.santaDrops[i]))
+			this.SantaDrops++;
+		else
+			this.ChristmasComplete = false;
+
 	// Check Christmas cookies
 	this.ChristmasCookies = 0;
-	for (var i = 0; i < this.Lists.ChristmasCookies.length; i++) {
-		var name = this.Lists.ChristmasCookies[i];
-		if (Game.Has(name)) this.ChristmasCookies++;
-		else this.ChristmasComplete = false;
-	}
+	for (var i in this.Lists.ChristmasCookies)
+		if (Game.Has(this.Lists.ChristmasCookies[i]))
+			this.ChristmasCookies++;
+		else
+			this.ChristmasComplete = false;
 
 	//======== HALLOWEEN ========
 
@@ -586,10 +572,14 @@ SeasonCalculator.prototype.Update = function () {
 	// Check heart cookies
 	this.ValentinesComplete = true;
 	this.HeartCookies = 0;
-	for (var i = 0; i < this.Lists.HeartCookies.length; i++) {
-		var name = this.Lists.HeartCookies[i];
-		if (Game.Has(name)) this.HeartCookies++;
-		else this.ValentinesComplete = false;
+	for (var i in Game.UnlockAt) {
+		var at = Game.UnlockAt[i];
+		if (at.season != 'valentines')
+			continue;
+		if (Game.Has(at.name))
+			this.HeartCookies++;
+		else
+			this.ValentinesComplete = false;
 	}
 
 	//======== EASTER ========
@@ -622,7 +612,7 @@ SeasonCalculator.prototype.Update = function () {
 		}
 		else if (!this.ValentinesComplete &&
 		    Game.santaLevel == Game.santaLevels.length - 1 &&
-		    this.SantaDrops == this.Lists.SantaDrops.length)
+		    this.SantaDrops == Game.santaDrops.length)
 			this.NewSeason = 'valentines';
 	}
 	else if (Game.season == 'valentines') {
