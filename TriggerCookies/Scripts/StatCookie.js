@@ -208,7 +208,6 @@ function StatCookies() {
 
 	this.BaseCPS = 0;
 	this.ClickCPS = 0;
-	this.ClicksPerSecond = 0;
 	this.TotalCPS = 0;
 
 	/*var t = 500.0;
@@ -228,27 +227,24 @@ StatCookies.prototype.WriteStats = function () {
 	str += Helper.Menu.WriteSectionHeader('Cookies', [3, 5]);
 
 	str +=
-	'<div class="listing"><b>Cookies in bank :</b> <div id="' + iStat('cookiesInBank') + '" class="price plain">' + Beautify(Game.cookies) + '</div></div>' +
-	'<div class="listing"><b>Cookies baked (this game) :</b> <div id="' + iStat('cookiesThisGame') + '" class="price plain">' + Beautify(Game.cookiesEarned) + '</div></div>' +
-	'<div class="listing"><b>Cookies baked (all time) :</b> <div id="' + iStat('cookiesAllTime') + '" class="price plain">' + Beautify(Game.cookiesEarned + Game.cookiesReset) + '</div></div>' +
-	'<div class="listing"><b>Cookies forfeited by ascending :</b> <div id="' + iStat('cookiesForfeited') + '" class="price plain">' + Beautify(Game.cookiesReset) + '</div></div>' +
+	'<div class="listing"><b>Cookies in bank :</b> <div id="' + iStat('cookiesInBank') + '" class="price plain"></div></div>' +
+	'<div class="listing"><b>Cookies baked (this game) :</b> <div id="' + iStat('cookiesThisGame') + '" class="price plain"></div></div>' +
+	'<div class="listing"><b>Cookies baked (all time) :</b> <div id="' + iStat('cookiesAllTime') + '" class="price plain"></div></div>' +
+	'<div class="listing"><b>Cookies forfeited by ascending :</b> <div id="' + iStat('cookiesForfeited') + '" class="price plain"></div></div>' +
 
 	Helper.Menu.WriteSectionMiddle() +
 
-	'<div class="listing"><b>Current CPS : </b> <div id="' + iStat('currentCPS') + '" class="price plain"> ' + Beautify(Game.cookiesPs, 1) + ' <small>' +
-		'(multiplier : ' + Beautify(Math.round(Game.globalCpsMult * 100), 1) + '%)' +
-		(Game.cpsSucked > 0 ? ' <span class="warning">(withered : ' + Beautify(Math.round(Game.cpsSucked * 100), 1) + '%)</span>' : '') +
-		'</small></div></div>' +
-	'<div class="listing"><b>Base CPS : </b> <div id="' + iStat('baseCPS') + '" class="price plain">' + Beautify(this.BaseCPS) + '</div></div>' +
-	'<div class="listing"><b>Click CPS : </b> <div id="' + iStat('clickCPS') + '" class="price plain">' + Beautify(this.ClickCPS) + '</div></div>' +
-	'<div class="listing"><b>Total CPS : </b> <div id="' + iStat('totalCPS') + '" class="price plain">' + Beautify(this.TotalCPS) + '</div></div>' +
+	'<div class="listing"><b>Current CPS : </b> <div id="' + iStat('currentCPS') + '" class="price plain"></div></div>' +
+	'<div class="listing"><b>Base CPS : </b> <div id="' + iStat('baseCPS') + '" class="price plain"></div></div>' +
+	'<div class="listing"><b>Click CPS : </b> <div id="' + iStat('clickCPS') + '" class="price plain"></div></div>' +
+	'<div class="listing"><b>Total CPS : </b> <div id="' + iStat('totalCPS') + '" class="price plain"></div></div>' +
 
 	Helper.Menu.WriteSectionMiddle() +
 
-	'<div class="listing"><b>Hand-made cookies : </b> <div id="' + iStat('handMade') + '" class="price plain"> ' + Beautify(Game.handmadeCookies) + '</div></div>' +
-	'<div class="listing"><b>Cookies per click : </b> <div id="' + iStat('cookiesPerClick') + '" class="price plain"> ' + Beautify(Game.computedMouseCps, 1) + '</div></div>' +
-	'<div class="listing"><b>Cookie clicks : </b> <div id="' + iStat('clicks') + '" class="priceoff">' + Beautify(Game.cookieClicks) + '</div></div>' +
-	'<div class="listing"><b>Clicks per second : </b> <div id="' + iStat('clickRate') + '" class="priceoff">' + Beautify(this.ClicksPerSecond) + '</div></div>' +
+	'<div class="listing"><b>Hand-made cookies : </b> <div id="' + iStat('handMade') + '" class="price plain"></div></div>' +
+	'<div class="listing"><b>Cookies per click : </b> <div id="' + iStat('cookiesPerClick') + '" class="price plain"></div></div>' +
+	'<div class="listing"><b>Cookie clicks : </b> <div id="' + iStat('clicks') + '" class="priceoff"></div></div>' +
+	'<div class="listing"><b>Clicks per second : </b> <div id="' + iStat('clickRate') + '" class="priceoff"></div></div>' +
 
 	'';
 
@@ -261,13 +257,18 @@ StatCookies.prototype.UpdateStats = function () {
 
 	lStat('cookiesInBank').innerHTML = Beautify(Game.cookies);
 	lStat('cookiesThisGame').innerHTML = Beautify(Game.cookiesEarned);
-	lStat('cookiesAllTime').innerHTML = Beautify(Game.cookiesEarned + Game.cookiesReset);
+	lStat('cookiesAllTime').innerHTML = Beautify(Game.cookiesEarned +
+	    Game.cookiesReset);
 	lStat('cookiesForfeited').innerHTML = Beautify(Game.cookiesReset);
 
-	lStat('currentCPS').innerHTML = Beautify(Game.cookiesPs, 1) + ' <small>' +
-		'(multiplier : ' + Beautify(Math.round(Game.globalCpsMult * 100), 1) + '%)' +
-		(Game.cpsSucked > 0 ? ' <span class="warning">(withered : ' + Beautify(Math.round(Game.cpsSucked * 100), 1) + '%)</span>' : '') +
-		'</small>';
+	var withered = '';
+	if (Game.cpsSucked > 0)
+		withered = ' <span class="warning">(withered : ' +
+		    Beautify(Math.round(Game.cpsSucked * 100), 1) + '%)</span>';
+	lStat('currentCPS').innerHTML = Beautify(Game.cookiesPs, 1) +
+	    ' <small>(multiplier : ' +
+	    Beautify(Math.round(Game.globalCpsMult * 100), 1) + '%)' +
+	    withered + '</small>';
 	lStat('baseCPS').innerHTML = Beautify(this.BaseCPS);
 	lStat('clickCPS').innerHTML = Beautify(this.ClickCPS);
 	lStat('totalCPS').innerHTML = Beautify(this.TotalCPS);
@@ -275,35 +276,16 @@ StatCookies.prototype.UpdateStats = function () {
 	lStat('handMade').innerHTML = Beautify(Game.handmadeCookies);
 	lStat('cookiesPerClick').innerHTML = Beautify(Game.computedMouseCps, 1);
 	lStat('clicks').innerHTML = Beautify(Game.cookieClicks);
-	lStat('clickRate').innerHTML = Beautify(this.ClicksPerSecond);
-
+	lStat('clickRate').innerHTML = Beautify(CalcCookie.ClicksPerSecond);
 }
 StatCookies.prototype.Update = function () {
 
 	var frenzyMod = (Game.frenzy > 0) ? Game.frenzyPower : 1;
-	this.ClicksPerSecond = CalcCookie.ClicksPerSecond;
 
 	this.BaseCPS = Game.cookiesPs / frenzyMod;
-	this.ClickCPS = this.ClicksPerSecond * Game.computedMouseCps;
-	this.TotalCPS = Game.cookiesPs * (1 - Game.cpsSucked) + this.ClickCPS;
-
+	this.ClickCPS = CalcCookie.ClicksPerSecond * Game.computedMouseCps;
+	this.TotalCPS = Game.cookiesPs + this.ClickCPS;
 }
-/*StatCookies.prototype.UpdateClickRate = function () {
-	this.Clicks[0].clicks = Math.max(0, Game.cookieClicks - this.CookieClicksLast);
-	this.Clicks[0].time = new Date().getTime() - this.Clicks[0].time;
-	var totalClicks = this.Clicks[0].clicks;
-	var totalTime = this.Clicks[0].time;
-	for (var i = this.Clicks.length - 2; i >= 0; i--) {
-		totalClicks += this.Clicks[i + 1].clicks;
-		totalTime += this.Clicks[i + 1].time;
-		this.Clicks[i + 1] = this.Clicks[i];
-	}
-	this.Clicks[0].time = new Date().getTime();
-	//this.ClicksPerSecond = totalClicks / this.Clicks.length;
-	this.ClicksPerSecond = totalClicks / totalTime * 1000.0;
-
-	this.CookieClicksLast = Game.cookieClicks;
-}*/
 
 //#endregion
 /*=====================================================================================
@@ -663,10 +645,14 @@ StatPrestige.prototype.Update = function () {
 	var chipsNext = Game.heavenlyChipsEarned + (this.AscendNowToGet + this.XAmount) - (this.AscendNowToGet + this.XAmount) % this.XAmount;
 	this.CookiesToNextXChips = Game.HowManyCookiesReset(chipsNext) - (Game.cookiesReset + Game.cookiesEarned);
 
-	this.ChipsPerSecond = Game.cookiesPs / this.CookiesPerChip;
-	this.BaseChipsPerSecond = StatCookie.CookieStats.BaseCPS / this.CookiesPerChip;
-	this.ClickChipsPerSecond = StatCookie.CookieStats.ClickCPS / this.CookiesPerChip;
-	this.TotalChipsPerSecond = StatCookie.CookieStats.TotalCPS / this.CookiesPerChip;
+	this.ChipsPerSecond = CalcCookie.Price.EstimatedCPS()
+	    / this.CookiesPerChip;
+	this.BaseChipsPerSecond = StatCookie.CookieStats.BaseCPS
+	    / this.CookiesPerChip;
+	this.ClickChipsPerSecond = StatCookie.CookieStats.ClickCPS
+	    / this.CookiesPerChip;
+	this.TotalChipsPerSecond = StatCookie.CookieStats.TotalCPS
+	    / this.CookiesPerChip;
 
 }
 
@@ -849,6 +835,8 @@ StatSeasons.prototype.UpdateStats = function () {
 
 }
 StatSeasons.prototype.Update = function () {
+
+	CalcCookie.Season.Update();
 
 	//======== HALLOWEEN ========
 
