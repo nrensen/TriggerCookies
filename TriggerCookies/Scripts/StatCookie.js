@@ -119,13 +119,9 @@ StatCookie.Init = function () {
 StatCookie.Enable = function (firstTime) {
 	
 	if (firstTime) {
-		l('goldenCookie').removeEventListener('click', Game.goldenCookie.click);
-		l('goldenCookie').removeEventListener('touchend', Game.goldenCookie.click);
-		Overrides.OverrideFunction('Game.goldenCookie.click', 'StatGolden.Click', 'StatCookie');
-		Overrides.OverrideFunction('Game.seasonPopup.click', 'StatSeasons.Click', 'StatCookie');
+		Overrides.OverrideFunction('Game.shimmerTypes["golden"].popFunc', 'StatGolden.Click', 'StatCookie');
+		Overrides.OverrideFunction('Game.shimmerTypes["reindeer"].popFunc', 'StatSeasons.Click', 'StatCookie');
 		Game.customLogic.push(StatGolden.Logic);
-		l('goldenCookie')[Game.clickStr] = Game.goldenCookie.click;
-		l('seasonPopup')[Game.clickStr] = Game.seasonPopup.click;
 	}
 
 	StatCookie.Enabled = true;
@@ -368,10 +364,11 @@ StatGolden.prototype.UpdateStats = function () {
 	lStat('goldenClicks').innerHTML = Beautify(Game.goldenClicksLocal) +
 		' <small>(all time : ' + Beautify(Game.goldenClicks) + ')</small>';
 	lStat('goldenMissed').innerHTML = Beautify(Game.missedGoldenClicks);
-	if (Game.goldenCookie.last == '')
+	var golden = Game.shimmerTypes['golden'];
+	if (golden.last == '')
 		lStat('lastEffect').innerHTML = 'None';
 	else
-		lStat('lastEffect').innerHTML = StatGolden.GetEffectName(Game.goldenCookie.last);
+		lStat('lastEffect').innerHTML = StatGolden.GetEffectName(golden.last);
 
 	var effects = {}
 	Object.keys(this.Effects).forEach(key =>
@@ -498,23 +495,23 @@ StatGolden.prototype.Accumulate = function (oldfrenzy) {
 		}
 	}
 }
-StatGolden.Click = function(event, force) {
-	var gc = Game.goldenCookie;
-	var oldchain = gc.chain;
+StatGolden.Click = function(gc) {
+	var golden = Game.shimmerTypes['golden'];
+	var oldchain = golden.chain;
 	var oldcookies = Game.cookies;
 	var oldfrenzy = Game.frenzy;
 	var oldclickFrenzy = Game.clickFrenzy;
 	var oldclicks = Game.goldenClicks;
 	var duration = 0;
 
-	Overrides.Backup.Functions['Game.goldenCookie.click'].func(event,force);
+	Overrides.Backup.Functions['Game.shimmerTypes["golden"].popFunc'].func.bind(golden)(gc);
 
 	if (Game.goldenClicks == oldclicks)
 		return;
 
 	var me = StatCookie.GoldenStats;
 	var earn = Game.cookies - oldcookies;
-	var key = gc.last;
+	var key = golden.last;
 	if (Game.frenzy > 0 && (earn != 0 || Game.clickFrenzy > oldclickFrenzy))
 		key += '+' + me.FrenzyKey;
 	var effect = me.Effects[key];
@@ -530,8 +527,8 @@ StatGolden.Click = function(event, force) {
 	if (earn != 0) {
 		effect.cookies += earn;
 		msg += ': ' + Beautify(earn) + ' cookies';
-		if (gc.last == 'chain cookie' && gc.chain == 0)
-			msg += ' (total: ' + Beautify(gc.total) +
+		if (golden.last == 'chain cookie' && golden.chain == 0)
+			msg += ' (total: ' + Beautify(golden.totalFromChain) +
 			    ' cookies)';
 	} else if (Game.clickFrenzy > oldclickFrenzy) {
 		me.ClickFrenzyKey = key;
@@ -541,7 +538,7 @@ StatGolden.Click = function(event, force) {
 		me.ClickFrenzyEarn = 0;
 		duration = Game.clickFrenzy / Game.fps;
 		msg += ' started: ' + duration + 's';
-	} else if (gc.last != 'blab') {
+	} else if (golden.last != 'blab') {
 		// interruped frenzy
 		if (me.FrenzyKey)
 			me.Accumulate(oldfrenzy);
@@ -871,11 +868,11 @@ StatSeasons.prototype.Update = function () {
 		this.Resets = Game.resets;
 	}
 }
-StatSeasons.Click = function() {
+StatSeasons.Click = function(reindeer) {
 	var cookies = Game.cookies;
 	var clicks = Game.reindeerClicked;
 
-	Overrides.Backup.Functions['Game.seasonPopup.click'].func();
+	Overrides.Backup.Functions['Game.shimmerTypes["reindeer"].popFunc'].func.bind(Game.shimmerTypes['reindeer'])(reindeer);
 
 	if (Game.reindeerClicked > clicks) {
 		var me = StatCookie.SeasonStats;
@@ -883,12 +880,12 @@ StatSeasons.Click = function() {
 		if (StatCookie.GoldenStats.FrenzyKey)
 			key += '+' + StatCookie.GoldenStats.FrenzyKey;
 
-		var reindeer = me.Reindeer[key];
-		if (reindeer === undefined)
-			me.Reindeer[key] = reindeer = { count: 0, cookies: 0 };
+		var stats = me.Reindeer[key];
+		if (stats === undefined)
+			me.Reindeer[key] = stats = { count: 0, cookies: 0 };
 		var earn = Game.cookies - cookies;
-		reindeer.count++;
-		reindeer.cookies += earn;
+		stats.count++;
+		stats.cookies += earn;
 		Helper.TimeLog(StatGolden.GetEffectName(key) + ': ' +
 		    Beautify(earn) + ' cookies');
 	}

@@ -116,7 +116,7 @@ AutoCookie.Enable = function (firstTime) {
 	if (firstTime) {
 		Game.customLogic.push(AutoCookie.InstantClickLogic);
 		Game.customLogic.push(AutoCookie.AutobuyLogic);
-		Game.customLogic.push(AutoCookie.GoldenClickLogic);
+		Game.customLogic.push(AutoCookie.ShimmerLogic);
 		Game.customLogic.push(AutoCookie.GoldenSwitchLogic);
 	}
 	AutoCookie.Actions['checkautoclick'].Enable(false);
@@ -838,19 +838,37 @@ AutoCookie.ToggleInstantClick = function() {
 	AutoCookie.LastClick = new Date().getTime();
 }
 
-/* Clicks the golden cookies. */
-AutoCookie.GoldenClickLogic = function () {
+/* Handles shimmers. */
+AutoCookie.ShimmerLogic = function () {
 	if (Game.AscendTimer || Game.OnAscend)
 		return;
 
-	if (Game.goldenCookie.life == 0 ||
-	    !AutoCookie.Actions['gold'].Enabled ||
-	    (Game.goldenCookie.wrath && !AutoCookie.Actions['wrath'].Enabled))
+	var gold = AutoCookie.Actions['gold'].Enabled;
+	var gnotify = AutoCookie.Actions['gnotify'].Enabled;
+	var wrath = AutoCookie.Actions['wrath'].Enabled;
+	var reindeer = AutoCookie.Actions['reindeer'].Enabled;
+
+	if (!gold && !wrath && !gnotify && !reindeer)
 		return;
 
-	var click = Game.Click;
-	Game.goldenCookie.click();
-	Game.Click = click;
+	for (var i = 0; i < Game.shimmers.length; i++) {
+		var shimmer = Game.shimmers[i];
+		switch (shimmer.type) {
+		case 'golden':
+			if (gold && (!shimmer.wrath || wrath))
+				shimmer.pop();
+			else if (gnotify) {
+				var dur = Math.ceil(Game.fps * shimmer.dur);
+				if (shimmer.life == dur - 1)
+					AutoCookie.NotifySound.play();
+			}
+			break;
+		case 'reindeer':
+			if (reindeer)
+				shimmer.pop();
+			break;
+		}
+	}
 }
 // probably should move this to calc cookie.
 AutoCookie.GoldenSwitchLogic = function() {
@@ -884,14 +902,6 @@ AutoCookie.GoldenSwitchLogic = function() {
 		}
 	}
 }
-/* Alerts when golden cookies appear. */
-AutoCookie.GoldenCookieAlert = function () {
-	// Prevent dealing with golden cookies while ascended.
-	if (!Game.AscendTimer && !Game.OnAscend) {
-		if (Game.goldenCookie.life > 0 && (Game.goldenCookie.wrath == 0 || AutoCookie.Actions['wrath'].Enabled) && !AutoCookie.Actions['gold'].Enabled)
-			AutoCookie.NotifySound.play();
-	}
-}
 /* Pops wrinklers when they appear. */
 AutoCookie.PopWrinklers = function () {
 	for (var i in Game.wrinklers) {
@@ -900,16 +910,6 @@ AutoCookie.PopWrinklers = function () {
 			me.hp = 0;
 		}
 	}
-}
-/* Clicks a reindeer if one exists. */
-AutoCookie.ClickReindeer = function () {
-	if (Game.AscendTimer || Game.OnAscend)
-		return;
-	if (Game.seasonPopup.life == 0 || Game.seasonPopup.type != 'reindeer')
-		return;
-	var click = Game.Click;
-	Game.seasonPopup.click();
-	Game.Click = click;
 }
 
 /* Autobuys the next item. */
@@ -1471,10 +1471,10 @@ AutoCookie.Actions = {
 
 	gold: new AutoCookieAction('Click Golden Cookies', 'Golden Click', [11, 14], 'toggle', false, 0, function() {}, true),
 	wrath: new AutoCookieAction('Allow Wrath Cookies', 'Allow Wrath', [15, 5], 'toggle', false, 0, function () {}, true),
-	gnotify: new AutoCookieAction('Golden Cookie Alert', 'Golden Alert', [8, 0], 'toggle', false, 1000, AutoCookie.GoldenCookieAlert, true),
+	gnotify: new AutoCookieAction('Golden Cookie Alert', 'Golden Alert', [8, 0], 'toggle', false, 1000, function () {}, true),
 
 	wrinkler: new AutoCookieAction('Pop Wrinklers', null, [19, 8], 'toggle', false, 2000, AutoCookie.PopWrinklers, true),
-	reindeer: new AutoCookieAction('Click Reindeer', null, [12, 9], 'toggle', false, 2000, AutoCookie.ClickReindeer, true),
+	reindeer: new AutoCookieAction('Click Reindeer', null, [12, 9], 'toggle', false, 2000, function() {}, true),
 
 	autobuildings: new AutoCookieAction('Autobuy Buildings', null, [15, 0], 'toggle', false, 0, function () {}, true),
 	autoupgrades: new AutoCookieAction('Autobuy Upgrades', null, [9, 0], 'toggle', false, 0, function () {}, true),
